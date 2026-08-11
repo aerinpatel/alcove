@@ -22,11 +22,13 @@ export interface LayoutObject {
 }
 
 interface CleanCanvasEditorProps {
-  objects: LayoutObject[];
+  objects?: LayoutObject[];
+  layoutObjects?: LayoutObject[];
   onChange: (newObjects: LayoutObject[]) => void;
 }
 
-export default function CleanCanvasEditor({ objects, onChange }: CleanCanvasEditorProps) {
+export default function CleanCanvasEditor({ objects: objectsProp, layoutObjects, onChange }: CleanCanvasEditorProps) {
+  const objects = objectsProp || layoutObjects || [];
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [customInputText, setCustomInputText] = useState("");
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -37,7 +39,7 @@ export default function CleanCanvasEditor({ objects, onChange }: CleanCanvasEdit
   const canvasWidth = 720;
   const canvasHeight = 520;
 
-  const selectedObject = objects.find((o) => o.id === selectedId);
+  const selectedObject = objects.find((o) => o?.id === selectedId);
 
   // Synchronize Konva Transformer node
   useEffect(() => {
