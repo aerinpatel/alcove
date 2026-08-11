@@ -102,6 +102,7 @@ export default function LibraryDetailPage({ params }: { params: Promise<{ id: st
   });
 
   const [selectedSlotId, setSelectedSlotId] = useState("");
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   // Fetch library details via TanStack Query
   const { data: library, isLoading, error } = useQuery<LibraryDetail>({
@@ -149,51 +150,82 @@ export default function LibraryDetailPage({ params }: { params: Promise<{ id: st
   }
 
   // Setup photo list
-  const primaryPhoto = library.photos[0]?.url || "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80";
-  const gridPhotos = library.photos.slice(1, 5);
+  const allPhotos = library.photos && library.photos.length > 0
+    ? library.photos.map((p) => p.url)
+    : [
+        "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1000&q=80",
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=600&q=80",
+      ];
+
+  const thumbnailList = allPhotos.slice(0, 4);
 
   const selectedSlot = library.slotTypes.find((s) => s.id === selectedSlotId);
   const displayPrice = selectedSlot ? Number(selectedSlot.price) : (library.slotTypes[0] ? Number(library.slotTypes[0].price) : 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full min-h-screen bg-white text-[#221C19]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       
       {/* Title Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight mb-2">
+        <h1 className="text-2xl md:text-3xl font-black text-stone-900 tracking-tight mb-2">
           {library.name}
         </h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 font-semibold">
+        <div className="flex flex-wrap items-center gap-4 text-sm text-stone-600 font-semibold">
           <span className="flex items-center gap-1">
             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             {library.rating ? `${library.rating.toFixed(2)}` : "New"} · {library.reviewCount} reviews
           </span>
-          <span className="flex items-center gap-1 text-gray-500">
-            <MapPin className="w-4 h-4 text-brand" />
+          <span className="flex items-center gap-1 text-stone-500">
+            <MapPin className="w-4 h-4 text-[#A95031]" />
             {library.address}, {library.city}
           </span>
         </div>
       </div>
 
-      {/* Photo Gallery Grid - Airbnb layout */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 rounded-2xl overflow-hidden mb-10 h-[280px] md:h-[420px] shadow-sm">
+      {/* Sleek Photo Gallery Layout - Left Vertical Thumbnails + Right Large Featured Photo */}
+      <div className="flex flex-col md:flex-row gap-3 sm:gap-4 h-[340px] sm:h-[450px] md:h-[500px] mb-10 select-none">
         
-        {/* Large photo */}
-        <div className="md:col-span-2 h-full bg-gray-100 overflow-hidden relative">
-          <img src={primaryPhoto} alt={library.name} className="w-full h-full object-cover hover:brightness-95 transition" />
-        </div>
-
-        {/* Small photos grid */}
-        <div className="hidden md:grid col-span-2 grid-cols-2 grid-rows-2 gap-2.5 h-full">
-          {[0, 1, 2, 3].map((idx) => {
-            const photoUrl = gridPhotos[idx]?.url || "https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=400&q=80";
+        {/* Left Column: Vertical Stack of 4 Thumbnail Photos */}
+        <div className="w-full md:w-36 lg:w-44 shrink-0 flex flex-row md:flex-col gap-2.5 h-auto md:h-full">
+          {thumbnailList.map((url, idx) => {
+            const isLast = idx === 3 && allPhotos.length > 4;
+            const isActive = activePhotoIndex === idx;
             return (
-              <div key={idx} className="bg-gray-100 overflow-hidden relative h-full">
-                <img src={photoUrl} alt={`${library.name} supplementary ${idx}`} className="w-full h-full object-cover hover:brightness-95 transition" />
+              <div
+                key={idx}
+                onClick={() => setActivePhotoIndex(idx)}
+                className={`relative flex-1 rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer bg-stone-100 transition-all duration-200 ${
+                  isActive ? "ring-2 ring-[#A95031] scale-[0.98]" : "hover:opacity-90"
+                }`}
+              >
+                <img
+                  src={url}
+                  alt={`${library.name} thumbnail ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {isLast && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center p-1">
+                    <span className="bg-[#A95031] text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-md truncate">
+                      View All ({allPhotos.length})
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
+
+        {/* Right Column: Large Featured Main Image */}
+        <div className="flex-1 h-full bg-stone-100 rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-sm border border-stone-200/60">
+          <img
+            src={allPhotos[activePhotoIndex] || allPhotos[0]}
+            alt={library.name}
+            className="w-full h-full object-cover transition-opacity duration-300"
+          />
+        </div>
+
       </div>
 
       {/* Content Layout columns */}
@@ -427,13 +459,13 @@ export default function LibraryDetailPage({ params }: { params: Promise<{ id: st
             </button>
 
             <p className="text-[11px] text-[#A0938A] text-center mt-4">
-              You won't be charged yet. Seat map selection is on the next step.
+              You won&apos;t be charged yet. Seat map selection is on the next step.
             </p>
           </div>
         </div>
 
       </div>
-
     </div>
+  </div>
   );
 }
