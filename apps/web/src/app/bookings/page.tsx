@@ -9,7 +9,7 @@ import {
   RotateCcw,
   Eye,
   Key,
-  MessageSquarePlus,
+  MessageSquare,
   Clock,
   X,
   CheckCircle2,
@@ -17,6 +17,15 @@ import {
   Building2,
   Copy,
   Check,
+  ArrowLeft,
+  Share2,
+  DoorOpen,
+  DoorClosed,
+  ShieldCheck,
+  FileText,
+  Printer,
+  ChevronRight,
+  User,
 } from "lucide-react";
 import { useAuth } from "../../context/AppContext";
 
@@ -42,6 +51,10 @@ interface BookingItem {
     name: string;
     address: string;
     photos: { url: string }[];
+    owner?: {
+      id?: string;
+      name: string;
+    };
   };
   review: {
     id: string;
@@ -53,10 +66,20 @@ interface BookingItem {
 export default function BookingsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+
+  // Dynamic logged-in user initial
+  const userInitial = user?.name
+    ? user.name.charAt(0).toUpperCase()
+    : user?.email
+    ? user.email.charAt(0).toUpperCase()
+    : "U";
 
   // Tab State: "upcoming" or "past"
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+
+  // Interactive Selected Booking State (Null = List view, BookingItem = Detail view)
+  const [selectedBooking, setSelectedBooking] = useState<BookingItem | null>(null);
 
   // Review Modal State
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -65,10 +88,7 @@ export default function BookingsPage() {
   const [comment, setComment] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  // Access Key Modal State
-  const [accessKeyModalOpen, setAccessKeyModalOpen] = useState(false);
-  const [selectedAccessKey, setSelectedAccessKey] = useState<string | null>(null);
-  const [selectedBookingDetails, setSelectedBookingDetails] = useState<BookingItem | null>(null);
+  // Copy Key state
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Fetch bookings using TanStack Query
@@ -126,31 +146,22 @@ export default function BookingsPage() {
     reviewMutation.mutate({ libraryId: selectedLibraryId, rating, comment });
   };
 
-  const openAccessKeyModal = (booking: BookingItem) => {
-    setSelectedBookingDetails(booking);
-    setSelectedAccessKey(booking.accessKey);
-    setCopiedKey(false);
-    setAccessKeyModalOpen(true);
-  };
-
-  const handleCopyAccessKey = () => {
-    if (selectedAccessKey) {
-      navigator.clipboard.writeText(selectedAccessKey);
-      setCopiedKey(true);
-      setTimeout(() => setCopiedKey(false), 2000);
-    }
+  const handleCopyAccessKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
   };
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-[#F8F5EE] flex items-center justify-center px-4 py-20">
-        <div className="max-w-md w-full bg-white border border-[#E8E2D5] rounded-3xl p-8 text-center shadow-lg">
+      <div className="min-h-screen bg-[#F8F5EE] flex items-center justify-center px-4 py-20 select-none">
+        <div className="max-w-md w-full bg-white border border-stone-200/80 rounded-3xl p-8 text-center shadow-lg">
           <Clock className="w-12 h-12 text-[#A95031] mx-auto mb-4" />
           <h3 className="text-2xl font-bold font-serif text-[#221C19] mb-2">Sign in Required</h3>
-          <p className="text-sm text-[#5A4D45] mb-6">Please log in to your account to view your study seat bookings.</p>
+          <p className="text-sm text-stone-500 mb-6">Please log in to your account to view your study seat bookings.</p>
           <button
             onClick={() => router.push("/auth/signin")}
-            className="w-full bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold py-3 rounded-xl transition shadow-md cursor-pointer"
+            className="w-full bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold py-3 rounded-full transition shadow-md cursor-pointer text-sm"
           >
             Go to Sign In
           </button>
@@ -174,68 +185,426 @@ export default function BookingsPage() {
 
   const displayBookings = activeTab === "upcoming" ? upcomingBookings : pastBookings;
 
-  return (
-    <div className="min-h-screen bg-[#F8F5EE] text-[#221C19] py-10 px-4 sm:px-6 lg:px-8 select-none font-sans">
-      <div className="mx-auto max-w-5xl space-y-8">
-        
-        {/* Page Title & Clean 2-Tab Switcher (Matching Reference E-Commerce Filter Bar) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[#E8E2D5] pb-6">
+  // ==========================================
+  // VIEW 2: INTERACTIVE BOOKING DETAILS PAGE
+  // ==========================================
+  if (selectedBooking) {
+    const photoUrl =
+      selectedBooking.library?.photos?.[0]?.url ||
+      "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1000&q=80";
+
+    const bookingDateFormatted = new Date(selectedBooking.date).toLocaleDateString(undefined, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const isPast = activeTab === "past" || selectedBooking.status === "COMPLETED";
+
+    return (
+      <div className="min-h-screen bg-[#F8F5EE] text-[#221C19] py-8 px-4 sm:px-6 lg:px-8 select-none">
+        <div className="mx-auto max-w-2xl space-y-6">
           
-          {/* 2 Clean Filter Tabs */}
-          <div className="flex items-center gap-6">
+          {/* Top Back Navigation Bar */}
+          <div className="flex items-center justify-between">
             <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`pb-3 text-base sm:text-lg font-bold transition cursor-pointer border-b-2 ${
-                activeTab === "upcoming"
-                  ? "border-[#A95031] text-[#A95031]"
-                  : "border-transparent text-stone-500 hover:text-stone-900"
-              }`}
+              onClick={() => setSelectedBooking(null)}
+              className="bg-white hover:bg-stone-100 text-stone-800 p-3 rounded-full border border-stone-200/80 transition shadow-xs cursor-pointer"
             >
-              Upcoming Bookings ({upcomingBookings.length})
+              <ArrowLeft className="w-5 h-5 text-stone-800" />
             </button>
 
+            <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#221C19] truncate max-w-xs text-center">
+              {selectedBooking.library?.name || "Booking Details"}
+            </h1>
+
+            <div className="w-10" />
+          </div>
+
+          {/* Featured Image & Header Info ("Your space" instead of "Your stay") */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs space-y-5">
+            <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden bg-stone-100 shadow-inner">
+              <img
+                src={photoUrl}
+                alt={selectedBooking.library?.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold text-stone-900">Your space</h2>
+              <p className="text-sm text-stone-500 font-medium">
+                Hosted by {selectedBooking.library?.owner?.name || "Library Host"}
+              </p>
+              <p className="text-xs text-stone-400 font-semibold">{bookingDateFormatted}</p>
+            </div>
+
             <button
-              onClick={() => setActiveTab("past")}
-              className={`pb-3 text-base sm:text-lg font-bold transition cursor-pointer border-b-2 ${
-                activeTab === "past"
-                  ? "border-[#A95031] text-[#A95031]"
-                  : "border-transparent text-stone-500 hover:text-stone-900"
-              }`}
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: selectedBooking.library?.name, url: window.location.href });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert("Link copied to clipboard!");
+                }
+              }}
+              className="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs py-3 rounded-full transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              Past Bookings ({pastBookings.length})
+              <Share2 className="w-4 h-4 text-stone-600" />
+              <span>Share listing</span>
             </button>
           </div>
 
-          <div className="text-xs font-mono text-stone-500 bg-white border border-[#E8E2D5] px-3 py-1.5 rounded-full self-start sm:self-auto">
-            SHOWING {displayBookings.length} {activeTab.toUpperCase()} RESERVATION{displayBookings.length === 1 ? "" : "S"}
+          {/* Check-in & Checkout Time Card */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200/60 shrink-0">
+                <DoorOpen className="w-6 h-6 text-[#A95031]" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-stone-400 block">Check-in</span>
+                <span className="text-sm font-bold text-stone-900 block">
+                  {selectedBooking.slotType?.startTime || "08:00 AM"}
+                </span>
+                <span className="text-[11px] text-stone-500 font-medium">{bookingDateFormatted}</span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/60 shrink-0">
+                <DoorClosed className="w-6 h-6 text-emerald-700" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-stone-400 block">Checkout</span>
+                <span className="text-sm font-bold text-stone-900 block">
+                  {selectedBooking.slotType?.endTime || "11:00 PM"}
+                </span>
+                <span className="text-[11px] text-stone-500 font-medium">{bookingDateFormatted}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Digital Access Key Card */}
+          <div className="bg-gradient-to-br from-[#1C1715] to-[#2B2320] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-amber-400" />
+                <span className="font-bold text-sm text-white uppercase tracking-wider">Digital Access Pass</span>
+              </div>
+              <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider ${
+                isPast ? "bg-stone-700 text-stone-300" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+              }`}>
+                {isPast ? "Expired" : "Active Pass"}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs text-stone-400 block mb-1">Access Key Code:</span>
+                <span className="font-mono text-2xl sm:text-3xl font-black text-amber-400 tracking-wider">
+                  {selectedBooking.accessKey || "KEY-874921"}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handleCopyAccessKey(selectedBooking.accessKey || "KEY-874921")}
+                className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2.5 rounded-full transition flex items-center gap-2 cursor-pointer border border-white/15 shrink-0"
+              >
+                {copiedKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-stone-300" />}
+                <span>{copiedKey ? "Copied!" : "Copy Code"}</span>
+              </button>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-stone-300 border-t border-white/10">
+              <div>
+                <span className="text-stone-400 block text-[10px]">Slot Timing:</span>
+                <span className="font-bold text-white">{selectedBooking.slotType?.name || "Full Day"} ({selectedBooking.slotType?.startTime} - {selectedBooking.slotType?.endTime})</span>
+              </div>
+              <div>
+                <span className="text-stone-400 block text-[10px]">Reserved Seat:</span>
+                <span className="font-bold text-amber-400">Seat {selectedBooking.seat?.seatCode || "S-1"} ({selectedBooking.seat?.seatType || "General"})</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Action Rows ("Message your Host" redirects to /messages & "Library Location" instead of "Your place") */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs space-y-2">
+            
+            <div
+              onClick={() => router.push("/messages")}
+              className="flex items-center gap-4 p-3 rounded-2xl transition cursor-pointer group hover:bg-stone-50"
+            >
+              <MessageSquare className="w-5 h-5 text-[#A95031] shrink-0" />
+              <div className="flex-1">
+                <h4 className="font-bold text-stone-900 text-sm group-hover:text-[#A95031] transition">Message your Host</h4>
+                <p className="text-xs text-stone-500">{selectedBooking.library?.owner?.name || "Library Host"}</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-stone-400 group-hover:translate-x-0.5 transition" />
+            </div>
+
+            <div className="border-t border-stone-100 pt-2 flex items-center gap-4 p-3 rounded-2xl transition">
+              <MapPin className="w-5 h-5 text-[#A95031] shrink-0" />
+              <div className="flex-1">
+                <h4 className="font-bold text-stone-900 text-sm">Library Location</h4>
+                <p className="text-xs text-stone-500">{selectedBooking.library?.address || "Main Branch"}</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-stone-400" />
+            </div>
+
+          </div>
+
+          {/* Reservation Details Section */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-xs space-y-5">
+            <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-3">
+              Reservation details
+            </h3>
+
+            <div className="space-y-4 text-xs sm:text-sm">
+              <div>
+                <span className="font-bold text-stone-900 block mb-0.5">Who&apos;s coming / Reserved Slot</span>
+                <span className="text-stone-600 block">
+                  {selectedBooking.slotType?.name} · Seat {selectedBooking.seat?.seatCode}
+                </span>
+              </div>
+
+              <div>
+                <span className="font-bold text-stone-900 block mb-0.5">Confirmation code</span>
+                <span className="font-mono text-stone-800 font-semibold uppercase tracking-wider block">
+                  {selectedBooking.accessKey || selectedBooking.id.substring(0, 8).toUpperCase()}
+                </span>
+              </div>
+
+              <div>
+                <span className="font-bold text-stone-900 block mb-0.5">Total Paid</span>
+                <span className="font-extrabold text-[#A95031] text-base block">
+                  ₹{selectedBooking.totalPrice}
+                </span>
+              </div>
+
+              {selectedBooking.review ? (
+                <div className="border-t border-stone-100 pt-3">
+                  <span className="font-bold text-stone-900 block mb-0.5">Your Rating & Review</span>
+                  <div className="flex items-center gap-1 text-amber-500 font-bold mb-1">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span>{selectedBooking.review.rating} / 5</span>
+                  </div>
+                  {selectedBooking.review.comment && (
+                    <p className="text-stone-600 text-xs italic bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                      &quot;{selectedBooking.review.comment}&quot;
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="border-t border-stone-100 pt-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-stone-900 block">Leave a Review</span>
+                    <span className="text-stone-400 text-xs">Share your experience with other students</span>
+                  </div>
+                  <button
+                    onClick={() => openReviewModal(selectedBooking.libraryId)}
+                    className="bg-amber-50 text-amber-800 hover:bg-amber-100 font-bold text-xs px-4 py-2 rounded-full border border-amber-200 transition cursor-pointer"
+                  >
+                    Rate & Review
+                  </button>
+                </div>
+              )}
+
+              <div className="border-t border-stone-100 pt-3">
+                <span className="font-bold text-stone-900 block mb-0.5">Cancellation policy</span>
+                <span className="text-stone-500 text-xs block leading-relaxed">
+                  Cancel before slot check-in time for a full refund. After that, your refund depends on when you cancel.
+                </span>
+              </div>
+            </div>
+
+            {/* Document Actions */}
+            <div className="pt-2 space-y-2 border-t border-stone-100">
+              <button
+                onClick={() => window.print()}
+                className="w-full flex items-center justify-between text-xs font-bold text-stone-800 hover:text-[#A95031] py-2 transition cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-stone-500" />
+                  <span>Get a PDF for booking verification</span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-stone-400" />
+              </button>
+
+              <button
+                onClick={() => window.print()}
+                className="w-full flex items-center justify-between text-xs font-bold text-stone-800 hover:text-[#A95031] py-2 transition cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-stone-500" />
+                  <span>Print details</span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-stone-400" />
+              </button>
+            </div>
+          </div>
+
+          {/* Rules and Instructions */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+            <h3 className="text-xl font-bold font-serif text-stone-900 mb-2">
+              Rules and instructions
+            </h3>
+            <ul className="space-y-2 text-xs text-stone-600 list-disc list-inside leading-relaxed">
+              <li>Strict quiet study zone — please keep mobile devices on silent mode.</li>
+              <li>Scan or show your Digital Access Pass key at turnstile for entry.</li>
+              <li>Occupy only your assigned seat number ({selectedBooking.seat?.seatCode}).</li>
+            </ul>
           </div>
 
         </div>
 
-        {/* Loading Skeleton */}
+        {/* Review Modal */}
+        {reviewModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white border border-stone-200 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4">
+              
+              <button
+                onClick={() => setReviewModalOpen(false)}
+                className="absolute top-4 right-4 text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-xl font-bold font-serif text-[#221C19]">Leave a Review</h3>
+              <p className="text-xs text-stone-500">Share your study experience with future students.</p>
+
+              {reviewError && (
+                <div className="bg-rose-50 text-rose-600 text-xs p-3 rounded-xl border border-rose-100 font-medium">
+                  {reviewError}
+                </div>
+              )}
+
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                
+                <div>
+                  <label className="text-xs font-bold text-stone-700 block mb-2">Rating (1 to 5 Stars)</label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="p-1 hover:scale-110 transition cursor-pointer"
+                      >
+                        <Star
+                          className={`w-7 h-7 ${
+                            star <= rating ? "fill-amber-400 text-amber-400" : "text-stone-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-stone-700 block mb-1">Your Feedback / Review</label>
+                  <textarea
+                    rows={4}
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="How was the lighting, quietness, and Wi-Fi speed?"
+                    className="w-full text-xs p-3 border border-stone-300 rounded-xl outline-none focus:border-[#A95031] transition bg-stone-50/50"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setReviewModalOpen(false)}
+                    className="px-4 py-2 text-xs font-bold text-stone-600 hover:text-stone-900 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reviewMutation.isPending}
+                    className="bg-[#A95031] hover:bg-[#8E3F24] text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        )}
+
+      </div>
+    );
+  }
+
+  // ==========================================
+  // VIEW 1: BOOKINGS LIST ("Bookings" instead of "Trips")
+  // ==========================================
+  return (
+    <div className="min-h-screen bg-[#F8F5EE] text-[#221C19] py-10 px-4 sm:px-6 lg:px-8 select-none font-sans">
+      <div className="mx-auto max-w-4xl space-y-8">
+        
+        {/* Page Title Header ("Bookings" instead of "Trips") */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-bold font-serif text-[#221C19] tracking-tight">
+            Bookings
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-500 font-medium">
+            Your reserved study spaces & booking history
+          </p>
+        </div>
+
+        {/* 2 Filter Tabs (Upcoming vs Past) */}
+        <div className="flex items-center justify-center gap-4 border-b border-stone-200/80 pb-4">
+          <button
+            onClick={() => setActiveTab("upcoming")}
+            className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${
+              activeTab === "upcoming"
+                ? "bg-[#A95031] text-white shadow-md"
+                : "bg-white text-stone-600 border border-stone-200/80 hover:bg-stone-50"
+            }`}
+          >
+            Upcoming ({upcomingBookings.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("past")}
+            className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${
+              activeTab === "past"
+                ? "bg-[#A95031] text-white shadow-md"
+                : "bg-white text-stone-600 border border-stone-200/80 hover:bg-stone-50"
+            }`}
+          >
+            Past Bookings ({pastBookings.length})
+          </button>
+        </div>
+
+        {/* Loading Skeletons */}
         {isLoading && (
-          <div className="space-y-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="animate-pulse bg-white border border-[#E8E2D5] rounded-2xl h-56 w-full shadow-xs" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse bg-white border border-stone-200/80 rounded-3xl h-32 w-full shadow-xs" />
             ))}
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center py-10 text-rose-700 bg-rose-50 rounded-2xl border border-rose-200 font-semibold text-sm">
-            Failed to load your booking history. Please verify your connection.
+          <div className="text-center py-10 text-rose-700 bg-rose-50 rounded-3xl border border-rose-200 font-semibold text-sm">
+            Failed to load your booking history. Please verify connection.
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && displayBookings.length === 0 && (
-          <div className="text-center py-20 border border-dashed border-[#E8E2D5] rounded-3xl max-w-lg mx-auto bg-white p-8 shadow-sm">
+          <div className="text-center py-16 border border-dashed border-stone-200/80 rounded-3xl bg-white p-8 shadow-xs max-w-md mx-auto">
             <Calendar className="w-12 h-12 text-stone-400 mx-auto mb-3" />
             <h3 className="font-bold font-serif text-[#221C19] text-xl mb-1">
               No {activeTab} bookings found
             </h3>
-            <p className="text-xs sm:text-sm text-stone-500 mb-6">
+            <p className="text-xs text-stone-500 mb-6">
               {activeTab === "upcoming"
                 ? "You don't have any active study seat reservations at this time."
                 : "You haven't completed any past study seat reservations yet."}
@@ -243,17 +612,17 @@ export default function BookingsPage() {
             {activeTab === "upcoming" && (
               <button
                 onClick={() => router.push("/")}
-                className="bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md cursor-pointer"
+                className="bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold px-6 py-3 rounded-full text-xs transition shadow-md cursor-pointer"
               >
-                Find & Book a StudySpace
+                Explore & Book a Space
               </button>
             )}
           </div>
         )}
 
-        {/* Bookings List (Exact E-Commerce Style Card Layout Matching Reference Screenshot) */}
+        {/* Interactive Bookings Cards List */}
         {!isLoading && !error && displayBookings.length > 0 && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {displayBookings.map((booking) => {
               const libraryPhoto =
                 booking.library?.photos?.[0]?.url ||
@@ -268,176 +637,51 @@ export default function BookingsPage() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white border border-[#E8E2D5] rounded-2xl shadow-xs overflow-hidden transition duration-200 hover:shadow-md"
+                  onClick={() => setSelectedBooking(booking)}
+                  className="group bg-white border border-stone-200/80 rounded-3xl p-4 sm:p-5 shadow-xs hover:shadow-lg transition duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                 >
-                  
-                  {/* Top Bar Header (Reference Screenshot Metadata Layout) */}
-                  <div className="bg-[#FAF8F5] border-b border-[#E8E2D5] p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    
-                    {/* Metadata Summary: Date, Amount, Location */}
-                    <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs font-sans text-stone-600">
-                      <div>
-                        <span className="text-stone-400 font-medium block uppercase text-[10px] tracking-wider">Booking Date:</span>
-                        <span className="font-bold text-[#221C19] text-sm">{bookingDateFormatted}</span>
-                      </div>
-
-                      <div>
-                        <span className="text-stone-400 font-medium block uppercase text-[10px] tracking-wider">Total Amount:</span>
-                        <span className="font-bold text-[#221C19] text-sm">₹{booking.totalPrice}</span>
-                      </div>
-
-                      <div>
-                        <span className="text-stone-400 font-medium block uppercase text-[10px] tracking-wider">Location:</span>
-                        <span className="font-bold text-[#221C19] text-xs sm:text-sm truncate block max-w-[180px]" title={booking.library?.address}>
-                          {booking.library?.address || "Main Branch"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Right Header Controls: Access Key Number (Upcoming) or Access Key Expired Badge (Past) */}
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-[#E8E2D5]">
-                      
-                      {activeTab === "upcoming" ? (
-                        <>
-                          <div className="text-left md:text-right">
-                            <span className="text-stone-400 font-mono text-[10px] uppercase block tracking-wider font-semibold">
-                              Access Key:
-                            </span>
-                            <span className="font-mono text-sm font-extrabold text-[#A95031]">
-                              #{booking.accessKey && !booking.accessKey.startsWith("eyJ") && booking.accessKey.length <= 16
-                                ? booking.accessKey
-                                : `AL-${booking.id.slice(0, 4).toUpperCase()}-${booking.id.slice(4, 8).toUpperCase()}`}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openAccessKeyModal(booking)}
-                              className="bg-[#A95031] hover:bg-[#8E3F24] text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Key className="w-3.5 h-3.5" />
-                              <span>Access Pass</span>
-                            </button>
-                            
-                            <button
-                              onClick={() => router.push(`/libraries/${booking.libraryId}`)}
-                              className="bg-white hover:bg-stone-50 border border-[#E8E2D5] text-[#221C19] text-xs font-bold px-4 py-2 rounded-xl transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Eye className="w-3.5 h-3.5 text-stone-500" />
-                              <span>View Space</span>
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-semibold text-stone-500 bg-stone-100 border border-stone-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-stone-400" />
-                            Access Key Expired
-                          </span>
-
-                          <button
-                            onClick={() => router.push(`/libraries/${booking.libraryId}`)}
-                            className="bg-white hover:bg-stone-50 border border-[#E8E2D5] text-[#221C19] text-xs font-bold px-4 py-2 rounded-xl transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-stone-500" />
-                            <span>View Space</span>
-                          </button>
-                        </div>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                  {/* Status Banner */}
-                  <div className="px-5 pt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-bold text-[#221C19] uppercase tracking-wide">
-                        {booking.status === "CONFIRMED" ? `Reserved for ${bookingDateFormatted}` : booking.status}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Main Card Body (Photo Left, Details Right) */}
-                  <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-5">
-                    
-                    {/* Library Photo */}
-                    <div className="w-full sm:w-36 h-36 rounded-2xl overflow-hidden border border-[#E8E2D5] shrink-0 bg-stone-100 relative shadow-2xs">
+                  <div className="flex items-center gap-4 sm:gap-5 w-full sm:w-auto">
+                    {/* Thumbnail Photo */}
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-stone-100 shrink-0 shadow-xs">
                       <img
                         src={libraryPhoto}
-                        alt={booking.library.name}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        alt={booking.library?.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       />
                     </div>
 
-                    {/* Booking Details & Actions */}
-                    <div className="flex-1 space-y-3 w-full">
-                      <h3 className="font-bold font-serif text-[#221C19] text-lg sm:text-xl leading-snug">
-                        {booking.library.name}
+                    {/* Information */}
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#A95031] transition truncate">
+                        {booking.library?.name || "StudySpace"}
                       </h3>
+                      <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                        {bookingDateFormatted}
+                      </p>
 
-                      <div className="text-xs sm:text-sm text-stone-600 space-y-1 font-medium">
-                        <p className="flex items-center gap-1.5 text-stone-500">
-                          <MapPin className="w-3.5 h-3.5 text-[#A95031] shrink-0" />
-                          <span>{booking.library.address}</span>
-                        </p>
-                        <p className="flex items-center gap-1.5 text-[#221C19] font-bold">
-                          <Clock className="w-3.5 h-3.5 text-[#A95031] shrink-0" />
-                          <span>{booking.slotType.name} ({booking.slotType.startTime} - {booking.slotType.endTime}) &bull; Seat {booking.seat.seatCode} ({booking.seat.seatType})</span>
-                        </p>
+                      {/* Logged-in User Initial & Seat Badge (NO hardcoded A/R avatar badges!) */}
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <span className="w-5 h-5 rounded-full bg-[#A95031]/10 text-[#A95031] text-[10px] font-black flex items-center justify-center border border-[#A95031]/20">
+                          {userInitial}
+                        </span>
+                        <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full">
+                          Seat {booking.seat?.seatCode || "Reserved"}
+                        </span>
                       </div>
-
-                      {/* Action Links Row (Matching Reference Screenshot Links: "Buy it again | View Product") */}
-                      <div className="pt-3 flex items-center gap-4 text-xs font-bold flex-wrap border-t border-stone-100">
-                        
-                        {/* Book Again Button */}
-                        <button
-                          onClick={() => router.push(`/libraries/${booking.libraryId}`)}
-                          className="inline-flex items-center gap-1.5 text-[#A95031] hover:underline cursor-pointer"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Book again</span>
-                        </button>
-
-                        <span className="text-stone-300">|</span>
-
-                        {/* View Space Link */}
-                        <button
-                          onClick={() => router.push(`/libraries/${booking.libraryId}`)}
-                          className="inline-flex items-center gap-1.5 text-stone-700 hover:text-black hover:underline cursor-pointer"
-                        >
-                          <Eye className="w-3.5 h-3.5 text-stone-500" />
-                          <span>View Space Details</span>
-                        </button>
-
-                        {/* Review Link (If Past Booking) */}
-                        {activeTab === "past" && (
-                          <>
-                            <span className="text-stone-300">|</span>
-                            {booking.review ? (
-                              <span className="inline-flex items-center gap-1 text-amber-700 font-semibold bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                Reviewed ({booking.review.rating}/5)
-                              </span>
-                            ) : (
-                              <button
-                                onClick={() => openReviewModal(booking.libraryId)}
-                                className="inline-flex items-center gap-1.5 text-[#A95031] hover:underline cursor-pointer"
-                              >
-                                <MessageSquarePlus className="w-3.5 h-3.5" />
-                                <span>Leave a Review</span>
-                              </button>
-                            )}
-                          </>
-                        )}
-
-                      </div>
-
                     </div>
-
                   </div>
 
+                  {/* Right Price & Arrow */}
+                  <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
+                    <div className="text-left sm:text-right">
+                      <span className="text-[10px] text-stone-400 font-medium block uppercase tracking-wider">Total</span>
+                      <span className="text-base font-extrabold text-stone-900">₹{booking.totalPrice}</span>
+                    </div>
+
+                    <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-[#A95031] text-stone-400 group-hover:text-white flex items-center justify-center transition shadow-xs">
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -445,149 +689,6 @@ export default function BookingsPage() {
         )}
 
       </div>
-
-      {/* ACCESS KEY PASS MODAL */}
-      {accessKeyModalOpen && selectedBookingDetails && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#E8E2D5] relative space-y-6 text-center select-text">
-            
-            <button
-              onClick={() => setAccessKeyModalOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-14 h-14 bg-[#A95031]/10 rounded-2xl flex items-center justify-center mx-auto text-[#A95031]">
-              <Key className="w-7 h-7" />
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-serif font-bold text-[#221C19]">
-                Reception Digital Access Key
-              </h3>
-              <p className="text-xs text-stone-500 mt-1">
-                Show this key or code at the library reception desk to verify your reserved desk.
-              </p>
-            </div>
-
-            <div className="bg-[#FAF8F5] border border-[#E8E2D5] rounded-2xl p-5 space-y-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-400 block">
-                YOUR UNIQUE ACCESS PASS
-              </span>
-              <div className="flex items-center justify-center gap-3">
-                <span className="font-mono text-2xl font-black text-[#A95031] tracking-widest">
-                  {selectedAccessKey}
-                </span>
-                <button
-                  onClick={handleCopyAccessKey}
-                  className="p-2 rounded-lg bg-white border border-[#E8E2D5] text-stone-700 hover:bg-stone-50 transition cursor-pointer"
-                  title="Copy Access Key"
-                >
-                  {copiedKey ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              {copiedKey && <p className="text-[11px] text-emerald-600 font-bold">Key copied to clipboard!</p>}
-            </div>
-
-            <div className="text-left text-xs text-stone-600 bg-stone-50 p-4 rounded-xl space-y-1 font-medium">
-              <p className="font-bold text-[#221C19]">{selectedBookingDetails.library.name}</p>
-              <p>Seat: <strong className="font-mono text-stone-900">{selectedBookingDetails.seat.seatCode}</strong> ({selectedBookingDetails.seat.seatType})</p>
-              <p>Slot: {selectedBookingDetails.slotType.name} ({selectedBookingDetails.slotType.startTime} - {selectedBookingDetails.slotType.endTime})</p>
-            </div>
-
-            <button
-              onClick={() => setAccessKeyModalOpen(false)}
-              className="w-full bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold py-3 rounded-xl transition shadow-md cursor-pointer"
-            >
-              Done
-            </button>
-
-          </div>
-        </div>
-      )}
-
-      {/* REVIEW MODAL */}
-      {reviewModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#E8E2D5] relative space-y-6">
-            
-            <button
-              onClick={() => setReviewModalOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div>
-              <h3 className="text-2xl font-serif font-bold text-[#221C19]">
-                Rate Your Experience
-              </h3>
-              <p className="text-xs text-stone-500 mt-1">
-                Help other students by leaving a honest review of this study space.
-              </p>
-            </div>
-
-            {reviewError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-                {reviewError}
-              </div>
-            )}
-
-            <form onSubmit={handleReviewSubmit} className="space-y-4">
-              
-              <div className="flex justify-center gap-2 py-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className="p-1 transition transform hover:scale-110 cursor-pointer"
-                  >
-                    <Star
-                      className={`w-8 h-8 ${
-                        star <= rating ? "fill-amber-400 text-amber-400" : "text-stone-300"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Your Review (Optional)
-                </label>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Share details about lighting, quietness, Wi-Fi, or seating comfort..."
-                  className="w-full p-3 rounded-xl border border-[#E8E2D5] text-xs text-[#221C19] focus:outline-none focus:border-[#A95031] h-28 resize-none"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setReviewModalOpen(false)}
-                  className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={reviewMutation.isPending}
-                  className="flex-1 bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold py-3 rounded-xl text-xs transition shadow-md cursor-pointer disabled:opacity-50"
-                >
-                  {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
-                </button>
-              </div>
-
-            </form>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

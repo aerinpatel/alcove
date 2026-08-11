@@ -1419,6 +1419,7 @@ export default function CreateLibraryWizard() {
 
               <div className="w-full bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-xl min-h-[520px]">
                 <CleanCanvasEditor
+                  objects={layoutObjects}
                   layoutObjects={layoutObjects}
                   onChange={(updated) => setLayoutObjects(updated)}
                 />
