@@ -16,6 +16,7 @@ import {
   BookOpen,
   Target,
 } from "lucide-react";
+import { getAvatarUrl } from "../../utils/avatar";
 
 interface ProfileField {
   id: string;
@@ -312,8 +313,9 @@ export default function ProfilePage() {
             <div className="w-44 h-44 sm:w-52 sm:h-52 rounded-full bg-[#ECE6FE] text-[#582BE8] flex items-center justify-center text-6xl sm:text-7xl font-bold shadow-sm overflow-hidden">
               {avatarUrl ? (
                 <img
-                  src={avatarUrl}
+                  src={getAvatarUrl(avatarUrl) || avatarUrl}
                   alt={name || "User Avatar"}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-full h-full object-cover"
                 />
               ) : (

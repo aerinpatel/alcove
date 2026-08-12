@@ -144,11 +144,6 @@ export default function AboutPage() {
           
           {/* Left Column: Section Title & Intro Text */}
           <div className="md:col-span-5 space-y-6 md:sticky md:top-28">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-stone-300 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20 inline-flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-              THE FOUNDER&apos;S STORY
-            </span>
-
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold font-serif text-white tracking-tight leading-[1.08]">
               Our Journey<br />to Alcove
             </h1>
@@ -254,9 +249,6 @@ export default function AboutPage() {
 
         {/* Section Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center space-y-2">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-stone-300 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20">
-            THE ALCOVE PROMISE
-          </span>
           <h2 className="text-3xl sm:text-5xl font-bold font-serif text-white pt-2">
             That&apos;s what we want to provide you
           </h2>

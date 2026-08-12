@@ -203,27 +203,27 @@ export default function BookingsPage() {
     const isPast = activeTab === "past" || selectedBooking.status === "COMPLETED";
 
     return (
-      <div className="min-h-screen bg-[#F8F5EE] text-[#221C19] py-8 px-4 sm:px-6 lg:px-8 select-none">
+      <div className="min-h-screen bg-[#4A0A0D] text-white py-8 px-4 sm:px-6 lg:px-8 select-none font-sans">
         <div className="mx-auto max-w-2xl space-y-6">
           
           {/* Top Back Navigation Bar */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setSelectedBooking(null)}
-              className="bg-white hover:bg-stone-100 text-stone-800 p-3 rounded-full border border-stone-200/80 transition shadow-xs cursor-pointer"
+              className="bg-white/15 hover:bg-white/25 text-white p-3 rounded-full border border-white/20 transition shadow-md cursor-pointer"
             >
-              <ArrowLeft className="w-5 h-5 text-stone-800" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
 
-            <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#221C19] truncate max-w-xs text-center">
+            <h1 className="text-xl sm:text-2xl font-bold font-serif text-white truncate max-w-xs text-center drop-shadow-sm">
               {selectedBooking.library?.name || "Booking Details"}
             </h1>
 
             <div className="w-10" />
           </div>
 
-          {/* Featured Image & Header Info ("Your space" instead of "Your stay") */}
-          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs space-y-5">
+          {/* Featured Image & Header Info */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-2xl space-y-5 text-stone-900">
             <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden bg-stone-100 shadow-inner">
               <img
                 src={photoUrl}
@@ -249,7 +249,7 @@ export default function BookingsPage() {
                   alert("Link copied to clipboard!");
                 }
               }}
-              className="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs py-3 rounded-full transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs py-3 rounded-full transition flex items-center justify-center gap-2 cursor-pointer border border-stone-200/80"
             >
               <Share2 className="w-4 h-4 text-stone-600" />
               <span>Share listing</span>
@@ -258,7 +258,7 @@ export default function BookingsPage() {
 
           {/* Check-in & Checkout Time Card */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4">
+            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-2xl flex items-center gap-4 text-stone-900">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200/60 shrink-0">
                 <DoorOpen className="w-6 h-6 text-[#A95031]" />
               </div>
@@ -271,7 +271,7 @@ export default function BookingsPage() {
               </div>
             </div>
 
-            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs flex items-center gap-4">
+            <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-2xl flex items-center gap-4 text-stone-900">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center border border-emerald-200/60 shrink-0">
                 <DoorClosed className="w-6 h-6 text-emerald-700" />
               </div>
@@ -286,7 +286,7 @@ export default function BookingsPage() {
           </div>
 
           {/* Digital Access Key Card */}
-          <div className="bg-gradient-to-br from-[#1C1715] to-[#2B2320] text-white rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
+          <div className="bg-gradient-to-br from-[#1C1715] to-[#2B2320] text-white rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-4 border border-[#3E322D]">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Key className="w-5 h-5 text-amber-400" />
@@ -328,8 +328,8 @@ export default function BookingsPage() {
             </div>
           </div>
 
-          {/* Quick Action Rows ("Message your Host" redirects to /messages & "Library Location" instead of "Your place") */}
-          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-xs space-y-2">
+          {/* Quick Action Rows */}
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-5 shadow-2xl space-y-2 text-stone-900">
             
             <div
               onClick={() => router.push("/messages")}
@@ -355,7 +355,7 @@ export default function BookingsPage() {
           </div>
 
           {/* Reservation Details Section */}
-          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-xs space-y-5">
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-2xl space-y-5 text-stone-900">
             <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-3">
               Reservation details
             </h3>
@@ -403,19 +403,12 @@ export default function BookingsPage() {
                   </div>
                   <button
                     onClick={() => openReviewModal(selectedBooking.libraryId)}
-                    className="bg-amber-50 text-amber-800 hover:bg-amber-100 font-bold text-xs px-4 py-2 rounded-full border border-amber-200 transition cursor-pointer"
+                    className="bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold text-xs px-4 py-2 rounded-full transition cursor-pointer shadow-md"
                   >
                     Rate & Review
                   </button>
                 </div>
               )}
-
-              <div className="border-t border-stone-100 pt-3">
-                <span className="font-bold text-stone-900 block mb-0.5">Cancellation policy</span>
-                <span className="text-stone-500 text-xs block leading-relaxed">
-                  Cancel before slot check-in time for a full refund. After that, your refund depends on when you cancel.
-                </span>
-              </div>
             </div>
 
             {/* Document Actions */}
@@ -445,7 +438,7 @@ export default function BookingsPage() {
           </div>
 
           {/* Rules and Instructions */}
-          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-xs space-y-3">
+          <div className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-2xl space-y-3 text-stone-900">
             <h3 className="text-xl font-bold font-serif text-stone-900 mb-2">
               Rules and instructions
             </h3>
@@ -508,7 +501,7 @@ export default function BookingsPage() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="How was the lighting, quietness, and Wi-Fi speed?"
-                    className="w-full text-xs p-3 border border-stone-300 rounded-xl outline-none focus:border-[#A95031] transition bg-stone-50/50"
+                    className="w-full text-xs p-3 border border-stone-300 rounded-xl outline-none focus:border-[#A95031] transition bg-white text-stone-900 placeholder:text-stone-400 font-medium"
                     required
                   />
                 </div>
@@ -543,27 +536,27 @@ export default function BookingsPage() {
   // VIEW 1: BOOKINGS LIST ("Bookings" instead of "Trips")
   // ==========================================
   return (
-    <div className="min-h-screen bg-[#F8F5EE] text-[#221C19] py-10 px-4 sm:px-6 lg:px-8 select-none font-sans">
+    <div className="min-h-screen bg-[#4A0A0D] text-white py-10 px-4 sm:px-6 lg:px-8 select-none font-sans">
       <div className="mx-auto max-w-4xl space-y-8">
         
-        {/* Page Title Header ("Bookings" instead of "Trips") */}
+        {/* Page Title Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl sm:text-5xl font-bold font-serif text-[#221C19] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold font-serif text-white tracking-tight">
             Bookings
           </h1>
-          <p className="text-xs sm:text-sm text-stone-500 font-medium">
+          <p className="text-xs sm:text-sm text-stone-300 font-light">
             Your reserved study spaces & booking history
           </p>
         </div>
 
         {/* 2 Filter Tabs (Upcoming vs Past) */}
-        <div className="flex items-center justify-center gap-4 border-b border-stone-200/80 pb-4">
+        <div className="flex items-center justify-center gap-4 border-b border-white/10 pb-4">
           <button
             onClick={() => setActiveTab("upcoming")}
             className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${
               activeTab === "upcoming"
-                ? "bg-[#A95031] text-white shadow-md"
-                : "bg-white text-stone-600 border border-stone-200/80 hover:bg-stone-50"
+                ? "bg-white text-[#4A0A0D] shadow-lg font-black"
+                : "bg-white/10 text-stone-200 border border-white/20 hover:bg-white/20"
             }`}
           >
             Upcoming ({upcomingBookings.length})
@@ -573,8 +566,8 @@ export default function BookingsPage() {
             onClick={() => setActiveTab("past")}
             className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${
               activeTab === "past"
-                ? "bg-[#A95031] text-white shadow-md"
-                : "bg-white text-stone-600 border border-stone-200/80 hover:bg-stone-50"
+                ? "bg-white text-[#4A0A0D] shadow-lg font-black"
+                : "bg-white/10 text-stone-200 border border-white/20 hover:bg-white/20"
             }`}
           >
             Past Bookings ({pastBookings.length})
@@ -585,23 +578,23 @@ export default function BookingsPage() {
         {isLoading && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse bg-white border border-stone-200/80 rounded-3xl h-32 w-full shadow-xs" />
+              <div key={i} className="animate-pulse bg-white/10 border border-white/20 rounded-3xl h-32 w-full shadow-xs" />
             ))}
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center py-10 text-rose-700 bg-rose-50 rounded-3xl border border-rose-200 font-semibold text-sm">
+          <div className="text-center py-10 text-rose-200 bg-rose-950/60 rounded-3xl border border-rose-800 font-semibold text-sm">
             Failed to load your booking history. Please verify connection.
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && displayBookings.length === 0 && (
-          <div className="text-center py-16 border border-dashed border-stone-200/80 rounded-3xl bg-white p-8 shadow-xs max-w-md mx-auto">
+          <div className="text-center py-16 border border-stone-200/80 rounded-3xl bg-white p-8 shadow-2xl max-w-md mx-auto text-stone-900">
             <Calendar className="w-12 h-12 text-stone-400 mx-auto mb-3" />
-            <h3 className="font-bold font-serif text-[#221C19] text-xl mb-1">
+            <h3 className="font-bold font-serif text-stone-900 text-xl mb-1">
               No {activeTab} bookings found
             </h3>
             <p className="text-xs text-stone-500 mb-6">
@@ -612,7 +605,7 @@ export default function BookingsPage() {
             {activeTab === "upcoming" && (
               <button
                 onClick={() => router.push("/")}
-                className="bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold px-6 py-3 rounded-full text-xs transition shadow-md cursor-pointer"
+                className="bg-[#A95031] hover:bg-[#8E3F24] text-white font-extrabold px-6 py-3 rounded-full text-xs transition shadow-lg cursor-pointer"
               >
                 Explore & Book a Space
               </button>
@@ -638,11 +631,11 @@ export default function BookingsPage() {
                 <div
                   key={booking.id}
                   onClick={() => setSelectedBooking(booking)}
-                  className="group bg-white border border-stone-200/80 rounded-3xl p-4 sm:p-5 shadow-xs hover:shadow-lg transition duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  className="group bg-white border border-stone-200/80 rounded-3xl p-4 sm:p-5 shadow-2xl hover:shadow-2xl transition duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-stone-900"
                 >
                   <div className="flex items-center gap-4 sm:gap-5 w-full sm:w-auto">
                     {/* Thumbnail Photo */}
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-stone-100 shrink-0 shadow-xs">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-stone-100 shrink-0 shadow-xs border border-stone-200/60">
                       <img
                         src={libraryPhoto}
                         alt={booking.library?.name}
@@ -659,12 +652,12 @@ export default function BookingsPage() {
                         {bookingDateFormatted}
                       </p>
 
-                      {/* Logged-in User Initial & Seat Badge (NO hardcoded A/R avatar badges!) */}
+                      {/* Logged-in User Initial & Seat Badge */}
                       <div className="flex items-center gap-1.5 pt-1">
                         <span className="w-5 h-5 rounded-full bg-[#A95031]/10 text-[#A95031] text-[10px] font-black flex items-center justify-center border border-[#A95031]/20">
                           {userInitial}
                         </span>
-                        <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full">
+                        <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200/60">
                           Seat {booking.seat?.seatCode || "Reserved"}
                         </span>
                       </div>
@@ -675,10 +668,10 @@ export default function BookingsPage() {
                   <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100">
                     <div className="text-left sm:text-right">
                       <span className="text-[10px] text-stone-400 font-medium block uppercase tracking-wider">Total</span>
-                      <span className="text-base font-extrabold text-stone-900">₹{booking.totalPrice}</span>
+                      <span className="text-base font-extrabold text-[#A95031]">₹{booking.totalPrice}</span>
                     </div>
 
-                    <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-[#A95031] text-stone-400 group-hover:text-white flex items-center justify-center transition shadow-xs">
+                    <div className="w-8 h-8 rounded-full bg-stone-50 group-hover:bg-[#A95031] text-stone-400 group-hover:text-white flex items-center justify-center transition shadow-xs border border-stone-200">
                       <ChevronRight className="w-4 h-4" />
                     </div>
                   </div>

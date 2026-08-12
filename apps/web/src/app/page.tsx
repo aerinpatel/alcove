@@ -68,25 +68,53 @@ function LibraryCard({ lib }: { lib: LibraryListItem }) {
   return (
     <Link
       href={"/libraries/" + lib.id}
-      className="group flex flex-col cursor-pointer"
+      className="group flex flex-col bg-white border border-stone-200/80 rounded-3xl overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
     >
-      {/* Top Image Frame */}
-      <div className="relative aspect-[4/3] w-full bg-stone-100 rounded-2xl sm:rounded-3xl overflow-hidden mb-2.5">
+      {/* Top Spacious Image Frame (Aspect 4/3) */}
+      <div className="relative aspect-[4/3] w-full bg-stone-100 overflow-hidden">
         <img
           src={photo}
           alt={lib.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
         />
+
+        {/* Top Badges Overlay */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+          <span className="bg-black/55 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-xs truncate max-w-[150px]">
+            📍 {lib.city || "Gurugram"}
+          </span>
+
+          <span className="bg-white/95 backdrop-blur-md text-stone-900 text-xs font-extrabold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span>{ratingVal}</span>
+          </span>
+        </div>
+
+        {/* Hover Reserve Pill Overlay */}
+        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <span className="w-full bg-[#A95031] text-white text-xs font-bold py-2.5 rounded-full flex items-center justify-center gap-1.5 shadow-md">
+            <span>Reserve Seat</span>
+            <span className="text-sm">→</span>
+          </span>
+        </div>
       </div>
 
-      {/* Aesthetic Small & Sleek Text Below Image */}
-      <div className="px-0.5 space-y-0.5">
-        <h3 className="font-semibold text-stone-900 text-sm sm:text-base group-hover:text-[#A95031] transition truncate">
+      {/* Spacious Card Info Section */}
+      <div className="p-5 space-y-2">
+        <h3 className="font-bold text-stone-900 text-base sm:text-lg group-hover:text-[#A95031] transition truncate">
           {lib.name}
         </h3>
-        <p className="text-xs sm:text-sm text-stone-500 font-normal">
-          {"₹" + lowestPrice} for slot <span className="mx-0.5 text-stone-400">•</span> ★ {ratingVal}
+
+        <p className="text-xs text-stone-500 font-medium line-clamp-2 leading-relaxed min-h-[32px]">
+          {lib.address || `${lib.city}, India`}
         </p>
+
+        <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+          <div className="flex items-baseline gap-1">
+            <span className="font-extrabold text-[#A95031] text-lg">₹{lowestPrice}</span>
+            <span className="text-stone-400 font-medium text-xs">/ slot</span>
+          </div>
+        </div>
       </div>
     </Link>
   );
@@ -350,7 +378,7 @@ export default function HomePage() {
         <div className="flex-1 w-full">
           
           {/* Section Heading */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-2xl font-bold text-[#221C19]">
                 {activeSearch ? `Study Spaces in ${activeSearch}` : "Available Study Spaces"}

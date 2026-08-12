@@ -19,6 +19,7 @@ import {
   Sparkles,
   RefreshCw,
 } from "lucide-react";
+import { getAvatarUrl } from "../../utils/avatar";
 
 interface ChatUser {
   id: string;
@@ -356,8 +357,9 @@ function MessagesContent() {
                       <div className="relative shrink-0">
                         {c.user.avatarUrl ? (
                           <img
-                            src={c.user.avatarUrl}
+                            src={getAvatarUrl(c.user.avatarUrl) || c.user.avatarUrl}
                             alt={c.user.name}
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             className="w-10 h-10 rounded-full object-cover border border-slate-200"
                           />
                         ) : (
@@ -396,8 +398,9 @@ function MessagesContent() {
                   <div className="flex items-center gap-3">
                     {selectedPartner.avatarUrl ? (
                       <img
-                        src={selectedPartner.avatarUrl}
+                        src={getAvatarUrl(selectedPartner.avatarUrl) || selectedPartner.avatarUrl}
                         alt={selectedPartner.name}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         className="w-9 h-9 rounded-full object-cover border border-slate-200"
                       />
                     ) : (

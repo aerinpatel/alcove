@@ -20,6 +20,8 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+let keyGenerationPromise: Promise<string> | null = null;
+
 /**
  * Retrieves or generates an RSA-OAEP 2048-bit key pair for a given user ID.
  * Returns the base64-encoded SPKI public key.
@@ -35,30 +37,47 @@ export async function getOrGenerateKeyPair(userId: string): Promise<string> {
     return existingPublicKeySpki;
   }
 
-  // Generate new RSA-OAEP keypair
-  const keyPair = await window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true,
-    ["encrypt", "decrypt"]
-  );
+  if (keyGenerationPromise) {
+    return keyGenerationPromise;
+  }
 
-  // Export public key as SPKI Base64
-  const spkiBuffer = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
-  const publicKeyBase64 = arrayBufferToBase64(spkiBuffer);
+  keyGenerationPromise = (async () => {
+    try {
+      // Double check in case it was written while waiting
+      const checkPriv = localStorage.getItem(privateKeyStorageKey);
+      const checkPub = localStorage.getItem(publicKeyStorageKey);
+      if (checkPriv && checkPub) return checkPub;
 
-  // Export private key as JWK JSON string
-  const jwkPrivateKey = await window.crypto.subtle.exportKey("jwk", keyPair.privateKey);
-  const privateKeyJwkString = JSON.stringify(jwkPrivateKey);
+      // Generate new RSA-OAEP keypair
+      const keyPair = await window.crypto.subtle.generateKey(
+        {
+          name: "RSA-OAEP",
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: "SHA-256",
+        },
+        true,
+        ["encrypt", "decrypt"]
+      );
 
-  localStorage.setItem(publicKeyStorageKey, publicKeyBase64);
-  localStorage.setItem(privateKeyStorageKey, privateKeyJwkString);
+      // Export public key as SPKI Base64
+      const spkiBuffer = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+      const publicKeyBase64 = arrayBufferToBase64(spkiBuffer);
 
-  return publicKeyBase64;
+      // Export private key as JWK JSON string
+      const jwkPrivateKey = await window.crypto.subtle.exportKey("jwk", keyPair.privateKey);
+      const privateKeyJwkString = JSON.stringify(jwkPrivateKey);
+
+      localStorage.setItem(publicKeyStorageKey, publicKeyBase64);
+      localStorage.setItem(privateKeyStorageKey, privateKeyJwkString);
+
+      return publicKeyBase64;
+    } finally {
+      keyGenerationPromise = null;
+    }
+  })();
+
+  return keyGenerationPromise;
 }
 
 /**

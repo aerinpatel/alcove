@@ -16,6 +16,7 @@ import adminRouter from "./routes/admin";
 import notificationRouter from "./routes/notifications";
 import earningsRouter from "./routes/earnings";
 import chatRouter from "./routes/chat";
+import { getPresignedDownloadUrl } from "./utils/s3";
 
 const app = express();
 const server = http.createServer(app);
@@ -123,9 +124,21 @@ io.on("connection", (socket) => {
         },
       });
 
+      const formattedMessage = {
+        ...message,
+        sender: message.sender ? {
+          ...message.sender,
+          avatarUrl: message.sender.avatarUrl ? await getPresignedDownloadUrl(message.sender.avatarUrl) : null,
+        } : message.sender,
+        recipient: message.recipient ? {
+          ...message.recipient,
+          avatarUrl: message.recipient.avatarUrl ? await getPresignedDownloadUrl(message.recipient.avatarUrl) : null,
+        } : message.recipient,
+      };
+
       const room = `chat:${[senderId, recipientId].sort().join("_")}`;
-      io.to(room).emit("new-message", message);
-      io.to(recipientId).emit("new-message-notification", message);
+      io.to(room).emit("new-message", formattedMessage);
+      io.to(recipientId).emit("new-message-notification", formattedMessage);
     } catch (err) {
       console.error("Error processing send-message event:", err);
     }

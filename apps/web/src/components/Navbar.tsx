@@ -8,6 +8,7 @@ import { Search, Menu, User, LogOut, Compass, LayoutDashboard, Settings, MapPin,
 
 import AlcoveLogo from "./AlcoveLogo";
 import OwnerNavbar from "./OwnerNavbar";
+import { getAvatarUrl } from "../utils/avatar";
 
 export default function Navbar() {
   const { user, token, logout } = useAuth();
@@ -25,6 +26,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [avatarErr, setAvatarErr] = useState(false);
 
   // Search overlay inputs
   const [cityVal, setCityVal] = useState("");
@@ -181,15 +183,16 @@ export default function Navbar() {
                 className="flex items-center gap-3 border border-[#E8E2D5] bg-white hover:border-brand transition p-2 rounded-full cursor-pointer relative text-[#221C19] shadow-sm hover:shadow"
               >
                 <Menu className="w-4.5 h-4.5 ml-1 text-[#5A4D45]" />
-                {user?.avatarUrl ? (
+                {user?.avatarUrl && !avatarErr ? (
                   <img
-                    src={user.avatarUrl}
+                    src={getAvatarUrl(user.avatarUrl) || user.avatarUrl}
                     alt={user.name}
+                    onError={() => setAvatarErr(true)}
                     className="w-7 h-7 rounded-full object-cover border border-[#E8E2D5]"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-brand text-white flex items-center justify-center font-bold text-xs">
-                    {user.name.charAt(0).toUpperCase()}
+                  <div className="w-7 h-7 rounded-full bg-[#A95031] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
                   </div>
                 )}
               </button>

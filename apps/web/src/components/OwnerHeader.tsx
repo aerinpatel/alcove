@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AppContext";
 import AlcoveLogo from "./AlcoveLogo";
+import { getAvatarUrl } from "../utils/avatar";
 import {
   Menu,
   User,
@@ -103,9 +104,7 @@ export default function OwnerHeader() {
   const [avatarError, setAvatarError] = useState(false);
 
   const getAvatarSrc = (url: string) => {
-    if (url.startsWith("http")) return url;
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
-    return `${apiBase}/auth/avatar/${url}`;
+    return getAvatarUrl(url) || url;
   };
 
   return (

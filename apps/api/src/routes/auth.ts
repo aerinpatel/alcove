@@ -72,6 +72,8 @@ router.post("/signup", authRateLimiter(10, 900), validateBody(SignupSchema), asy
 
     setRefreshTokenCookie(res, refreshToken);
 
+    const signedAvatar = user.avatarUrl ? await getPresignedDownloadUrl(user.avatarUrl) : null;
+
     return res.status(201).json({
       accessToken,
       user: {
@@ -80,7 +82,7 @@ router.post("/signup", authRateLimiter(10, 900), validateBody(SignupSchema), asy
         email: user.email,
         role: user.role,
         phone: user.phone,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: signedAvatar,
       },
     });
   } catch (error) {
@@ -110,6 +112,8 @@ router.post("/signin", authRateLimiter(10, 900), validateBody(SigninSchema), asy
 
     setRefreshTokenCookie(res, refreshToken);
 
+    const signedAvatar = user.avatarUrl ? await getPresignedDownloadUrl(user.avatarUrl) : null;
+
     return res.json({
       accessToken,
       user: {
@@ -118,7 +122,7 @@ router.post("/signin", authRateLimiter(10, 900), validateBody(SigninSchema), asy
         email: user.email,
         role: user.role,
         phone: user.phone,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: signedAvatar,
       },
     });
   } catch (error) {

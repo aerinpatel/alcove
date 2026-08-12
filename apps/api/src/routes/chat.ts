@@ -3,6 +3,7 @@ import prisma from "../config/db";
 import { authMiddleware } from "../middleware/auth";
 import { validateBody } from "../middleware/validation";
 import { SavePublicKeySchema } from "@studyspace/shared";
+import { getPresignedDownloadUrl } from "../utils/s3";
 
 const router = Router();
 
@@ -23,10 +24,7 @@ router.post("/keys", validateBody(SavePublicKeySchema), async (req, res) => {
       create: { userId, publicKey },
     });
 
-    return res.status(200).json({
-      message: "Public key saved successfully",
-      key: savedKey,
-    });
+    return res.json(savedKey);
   } catch (error) {
     console.error("Save public key error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -34,26 +32,21 @@ router.post("/keys", validateBody(SavePublicKeySchema), async (req, res) => {
 });
 
 /**
- * GET /keys/:userId - Retrieve a user's public key
+ * GET /keys/:userId - Retrieve target user's public key
  */
 router.get("/keys/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const userKey = await prisma.publicKey.findUnique({
+    const keyRecord = await prisma.publicKey.findUnique({
       where: { userId },
-      select: {
-        userId: true,
-        publicKey: true,
-        createdAt: true,
-      },
     });
 
-    if (!userKey) {
-      return res.status(404).json({ message: "Public key not found for user" });
+    if (!keyRecord) {
+      return res.status(404).json({ message: "Public key not found for this user" });
     }
 
-    return res.json(userKey);
+    return res.json({ userId, publicKey: keyRecord.publicKey });
   } catch (error) {
     console.error("Fetch public key error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -82,7 +75,9 @@ router.get("/user/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.json(targetUser);
+    const signedAvatar = targetUser.avatarUrl ? await getPresignedDownloadUrl(targetUser.avatarUrl) : null;
+
+    return res.json({ ...targetUser, avatarUrl: signedAvatar });
   } catch (error) {
     console.error("Fetch chat user error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -115,7 +110,21 @@ router.get("/messages/:recipientId", async (req, res) => {
       },
     });
 
-    return res.json(messages);
+    const formatted = await Promise.all(
+      messages.map(async (m) => ({
+        ...m,
+        sender: m.sender ? {
+          ...m.sender,
+          avatarUrl: m.sender.avatarUrl ? await getPresignedDownloadUrl(m.sender.avatarUrl) : null,
+        } : m.sender,
+        recipient: m.recipient ? {
+          ...m.recipient,
+          avatarUrl: m.recipient.avatarUrl ? await getPresignedDownloadUrl(m.recipient.avatarUrl) : null,
+        } : m.recipient,
+      }))
+    );
+
+    return res.json(formatted);
   } catch (error) {
     console.error("Fetch messages error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -145,8 +154,9 @@ router.get("/conversations", async (req, res) => {
     for (const msg of messages) {
       const partner = msg.senderId === userId ? msg.recipient : msg.sender;
       if (!partnerMap.has(partner.id)) {
+        const signedAvatar = partner.avatarUrl ? await getPresignedDownloadUrl(partner.avatarUrl) : null;
         partnerMap.set(partner.id, {
-          user: partner,
+          user: { ...partner, avatarUrl: signedAvatar },
           lastMessage: {
             id: msg.id,
             encryptedPayload: msg.encryptedPayload,

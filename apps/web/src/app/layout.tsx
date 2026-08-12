@@ -25,13 +25,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="flex flex-col min-h-screen text-[#221C19] antialiased">
+      <body className="flex flex-col min-h-screen text-[#221C19] antialiased bg-[#F8F5EE]">
         <AppProvider>
           <ToastProvider>
-            <div className="bg-[url('https://studyspace-photos.s3.ap-south-1.amazonaws.com/useful/image-removebg-preview+(2).png')] bg-cover bg-center bg-no-repeat bg-fixed min-h-screen relative flex flex-col flex-grow">
-              {/* Soft subtle eggshell overlay to keep background image nicely visible while maintaining readability */}
-              <div className="absolute inset-0 bg-[#F8F5EE]/50 pointer-events-none z-0" />
-              
+            <div className="min-h-screen relative flex flex-col flex-grow bg-[#F8F5EE]">
               {/* Content wrapper */}
               <div className="relative z-10 flex flex-col min-h-screen flex-grow">
                 <NavigationWrapper>{children}</NavigationWrapper>
