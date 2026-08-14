@@ -10,14 +10,16 @@ export default function NavigationWrapper({ children }: { children: React.ReactN
   const pathname = usePathname();
   const isOwnerRoute = pathname?.startsWith("/owner");
   const isAuthRoute = pathname?.startsWith("/auth");
+  const isSearchRoute = pathname?.startsWith("/search");
 
-  const showNavbarAndFooter = !isOwnerRoute && !isAuthRoute;
+  const showFooter = !isOwnerRoute && !isAuthRoute;
+  const showNavbar = showFooter && !isSearchRoute;
 
   return (
     <>
-      {showNavbarAndFooter && <Navbar />}
+      {showNavbar && <Navbar />}
       <main className="flex-grow">{children}</main>
-      {showNavbarAndFooter && <Footer />}
+      {showFooter && <Footer />}
     </>
   );
 }

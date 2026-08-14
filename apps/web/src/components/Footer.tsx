@@ -13,17 +13,17 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#1C1715] text-[#E8E2D5] border-t border-[#332A26] select-none">
+    <footer className="bg-[#111111] text-white/90 border-t border-white/10 select-none">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-6 border-b border-[#332A26]">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-6 border-b border-white/10">
           <Link href="/" className="inline-block">
             <AlcoveLogo variant="light" size="md" />
           </Link>
 
           <Link
             href="/profile"
-            className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-hover text-white font-bold text-xs px-4 py-2 rounded-full transition shadow-md shadow-brand/20 cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 bg-[#A95031] hover:bg-[#8E3F24] text-white font-bold text-xs px-5 py-2.5 rounded-full transition shadow-lg cursor-pointer shrink-0"
           >
             <User className="w-3.5 h-3.5" />
             <span>Visit Your Profile</span>
@@ -32,16 +32,16 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-6 text-sm">
           <div className="flex items-center gap-6">
-            <Link href="/about" className="hover:text-brand transition text-[#A0938A] font-medium">About Us</Link>
-            <Link href="#contact" className="hover:text-brand transition text-[#A0938A] font-medium">Contact Us</Link>
+            <Link href="/about" className="hover:text-white transition text-white/60 font-semibold tracking-wide text-xs uppercase">About Us</Link>
+            <Link href="#contact" className="hover:text-white transition text-white/60 font-semibold tracking-wide text-xs uppercase">Contact Us</Link>
           </div>
           
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-1.5 bg-[#2B2320] hover:bg-[#382E2A] text-white font-semibold px-4 py-2 rounded-md border border-[#332A26] transition cursor-pointer text-xs"
+            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/80 font-bold px-4 py-2 rounded-full border border-white/10 transition cursor-pointer text-xs"
           >
             <span>Back to top</span>
-            <ArrowUp className="w-3 h-3 text-brand" />
+            <ArrowUp className="w-3 h-3 text-[#A95031]" />
           </button>
         </div>
 

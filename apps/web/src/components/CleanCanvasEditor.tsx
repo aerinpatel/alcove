@@ -566,9 +566,8 @@ export default function CleanCanvasEditor({ objects: objectsProp, layoutObjects,
         <div className="bg-stone-50 border border-stone-200 rounded-3xl p-5 space-y-5 text-left shadow-xs">
 
           <div className="flex items-center justify-between border-b border-stone-200/80 pb-3">
-            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5" />
-              <span>Properties Inspector</span>
+            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest">
+              Change properties
             </h3>
           </div>
 
@@ -714,10 +713,6 @@ export default function CleanCanvasEditor({ objects: objectsProp, layoutObjects,
           </div>
         </div>
       )}
-
-      <p className="text-xs text-stone-400 font-medium">
-        Drag corner handles on canvas to resize &bull; Use Properties Inspector to adjust Width, Height & Labels.
-      </p>
     </div>
   );
 }

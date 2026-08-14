@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../../../context/AppContext";
 import AlcoveLogo from "../../../../components/AlcoveLogo";
 import { LayoutObject } from "../../../../components/CleanCanvasEditor";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import {
   ArrowLeft,
   ArrowRight,
@@ -143,6 +144,26 @@ export default function CreateLibraryWizard() {
   const queryClient = useQueryClient();
   const { token, user, logout } = useAuth();
 
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const onMapLoad = React.useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
+  const handleMapDragEnd = () => {
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      if (center) {
+        setLatitude(center.lat());
+        setLongitude(center.lng());
+      }
+    }
+  };
+
+  const { isLoaded: isGoogleMapLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  });
+
   // Creation Step Flow:
   // Step 0: Welcome / Finish listing / Start new listing
   // Step 1: Intro banner - "Set up your Library setup" (step-1 image.avif)
@@ -177,9 +198,9 @@ export default function CreateLibraryWizard() {
   const [streetAddress, setStreetAddress] = useState("");
   const [landmark, setLandmark] = useState("");
   const [district, setDistrict] = useState("");
-  const [city, setCity] = useState("Fatehabad");
-  const [stateName, setStateName] = useState("Haryana");
-  const [pinCode, setPinCode] = useState("125050");
+  const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("");
+  const [pinCode, setPinCode] = useState("");
 
   // Geocoded Coordinates
   const [latitude, setLatitude] = useState<number>(28.4595);
@@ -269,9 +290,9 @@ export default function CreateLibraryWizard() {
     setStreetAddress("");
     setLandmark("");
     setDistrict("");
-    setCity("Fatehabad");
-    setStateName("Haryana");
-    setPinCode("125050");
+    setCity("");
+    setStateName("");
+    setPinCode("");
     setLatitude(28.4595);
     setLongitude(77.0266);
     setAmenities([]);
@@ -343,7 +364,7 @@ export default function CreateLibraryWizard() {
       const libData = await res.json();
 
       setLibraryName(libData.name || "");
-      setCity(libData.city || "Fatehabad");
+      setCity(libData.city || "");
       setStreetAddress(libData.address || "");
       if (libData.latitude) setLatitude(Number(libData.latitude));
       if (libData.longitude) setLongitude(Number(libData.longitude));
@@ -651,7 +672,8 @@ export default function CreateLibraryWizard() {
   };
 
   const getFullAddressDisplay = () => {
-    return `${flatHouse ? `${flatHouse}, ` : ""}${streetAddress || "Professor Colony"}, ${landmark ? `${landmark}, ` : ""}${district ? `${district}, ` : ""}${city || "Fatehabad"}, ${stateName || "Haryana"} ${pinCode || "125050"}, India`;
+    const parts = [flatHouse, streetAddress, landmark, district, city, stateName, pinCode].filter(Boolean);
+    return parts.length > 0 ? `${parts.join(", ")}, India` : "India";
   };
 
   // Check if current step allows proceeding
@@ -1066,7 +1088,7 @@ export default function CreateLibraryWizard() {
                   <img
                     src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/82bc5680-a901-42d6-80cb-a30d2b343de5.png"
                     alt="Tell us about your place"
-                    className="w-full max-w-xl object-contain rounded-3xl transition duration-200"
+                    className="w-full max-w-xl object-cover rounded-[32px] border border-stone-200/90 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] transition duration-300 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] hover:-translate-y-1"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
@@ -1089,20 +1111,39 @@ export default function CreateLibraryWizard() {
                   </p>
                 </div>
 
-                <div className="relative w-full max-w-2xl mx-auto h-96 sm:h-[420px] rounded-3xl overflow-hidden border border-stone-200/90 shadow-md bg-stone-100 flex flex-col justify-between p-4">
-                  <div className="bg-white/95 backdrop-blur-xs border border-stone-200 rounded-full px-5 py-3 shadow-sm mx-auto text-xs font-bold text-[#222222] flex items-center gap-2 max-w-xl truncate z-10">
+                <div className="relative w-full max-w-2xl mx-auto h-96 sm:h-[420px] rounded-3xl overflow-hidden border border-stone-200/90 shadow-md bg-stone-100 flex flex-col justify-between">
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xs border border-stone-200 rounded-full px-5 py-3 shadow-sm text-xs font-bold text-[#222222] flex items-center gap-2 max-w-xl truncate z-10 pointer-events-none">
                     <MapPin className="w-4 h-4 text-[#222222] shrink-0" />
                     <span className="truncate">{getFullAddressDisplay()}</span>
                   </div>
 
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="relative flex flex-col items-center">
-                      <div className="bg-[#222222] text-white p-3 rounded-full shadow-xl">
-                        <Home className="w-6 h-6" />
-                      </div>
-                      <div className="bg-[#222222] text-white text-[10px] font-bold px-3 py-1 rounded-full mt-2 shadow-md">
-                        Drag the map to reposition the pin
-                      </div>
+                  {isGoogleMapLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={{ width: "100%", height: "100%" }}
+                      center={{ lat: latitude, lng: longitude }}
+                      zoom={15}
+                      onLoad={onMapLoad}
+                      onDragEnd={handleMapDragEnd}
+                      options={{
+                        disableDefaultUI: true,
+                        zoomControl: true,
+                        keyboardShortcuts: false,
+                        gestureHandling: "greedy"
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-500 font-medium">
+                      Loading Map...
+                    </div>
+                  )}
+
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none z-10">
+                    <div className="bg-[#222222] text-white p-3 rounded-full shadow-xl">
+                      <Home className="w-6 h-6" />
+                    </div>
+                    <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#222222]"></div>
+                    <div className="bg-[#222222] text-white text-[10px] font-bold px-3 py-1 rounded-full mt-2 shadow-md">
+                      Drag the map to reposition the pin
                     </div>
                   </div>
                 </div>
@@ -1128,7 +1169,7 @@ export default function CreateLibraryWizard() {
                   <img
                     src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/step-2+image+2.avif"
                     alt="Make your place stand out"
-                    className="w-full max-w-xl h-[440px] sm:h-[500px] object-cover rounded-[32px] border border-stone-200/90 shadow-md transition duration-200"
+                    className="w-full max-w-xl h-[440px] sm:h-[500px] object-cover rounded-[32px] border border-stone-200/90 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] transition duration-300 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] hover:-translate-y-1"
                     onError={(e) => {
                       e.currentTarget.src = "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80";
                     }}
@@ -1313,11 +1354,11 @@ export default function CreateLibraryWizard() {
                   </p>
                 </div>
 
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-stone-200 max-w-[#500px]">
+                <div className="w-full flex items-center justify-center">
                   <img
                     src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/step+-3+image.avif"
                     alt="Step 3 Preview"
-                    className="w-full h-auto object-cover rounded-3xl"
+                    className="w-full max-w-xl h-[440px] sm:h-[500px] object-cover rounded-[32px] border border-stone-200/90 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] transition duration-300 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] hover:-translate-y-1"
                   />
                 </div>
               </div>
@@ -1424,17 +1465,24 @@ export default function CreateLibraryWizard() {
 
           {/* STEP 10: Integrated Floorplan Canvas Builder */}
           {step === 10 && (
-            <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 w-full space-y-4 max-w-7xl mx-auto">
-              <div className="text-center space-y-1 max-w-xl">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#222222] tracking-tight">
-                  Design your library floorplan map
+            <main className="flex-grow flex flex-col xl:flex-row items-center xl:items-start justify-center p-4 sm:p-6 w-full gap-8 max-w-[1500px] mx-auto mt-4 xl:mt-8">
+              {/* Left Column: Heading & Illustration */}
+              <div className="w-full xl:w-[360px] shrink-0 flex flex-col items-center xl:items-start text-center xl:text-left space-y-8 z-10 xl:pt-16">
+                <h1 className="text-5xl sm:text-[3.5rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-black via-stone-700 to-stone-400 leading-[1.05] drop-shadow-sm pb-2">
+                  Design<br className="hidden xl:block" /> your library<br className="hidden xl:block" /> layout
                 </h1>
-                <p className="text-xs text-stone-500 font-medium">
-                  Add chairs (S1, S2...), tables, ACs, and fans using clean symbols. Resize, rotate, and position them on your grid.
-                </p>
+                
+                <div className="hidden xl:block w-full max-w-[340px] pointer-events-none animate-in fade-in slide-in-from-left-12 duration-1000 -ml-2">
+                  <img 
+                    src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/image-removebg-preview+(1).png" 
+                    alt="Layout Decoration" 
+                    className="w-full h-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+                  />
+                </div>
               </div>
 
-              <div className="w-full bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-xl min-h-[520px]">
+              {/* Right Column: Canvas Container */}
+              <div className="relative z-10 w-full flex-grow bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] min-h-[520px]">
                 <CleanCanvasEditor
                   objects={layoutObjects}
                   layoutObjects={layoutObjects}
@@ -1457,43 +1505,51 @@ export default function CreateLibraryWizard() {
                   <span>Back</span>
                 </button>
 
-                {step < 10 ? (
-                  <button
-                    type="button"
-                    disabled={!canProceed()}
-                    onClick={() => {
-                      setFormError(null);
-                      if (step === 1 && !streetAddress) {
-                        setAddressModalOpen(true);
-                        return;
-                      }
-                      if (step === 6 && photos.length !== 5) {
-                        setFormError("You must upload exactly 5 images to proceed.");
-                        return;
-                      }
-                      if (step === 7 && !libraryName.trim()) {
-                        setFormError("Please enter a title for your library.");
-                        return;
-                      }
-                      setStep(step + 1);
-                    }}
-                    className={`text-xs font-bold px-8 py-3 rounded-xl transition cursor-pointer shadow-sm ${canProceed()
-                        ? "bg-[#222222] hover:bg-black text-white"
-                        : "bg-stone-200 text-stone-400 cursor-not-allowed"
-                      }`}
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleSubmitListing}
-                    disabled={isSubmitting}
-                    className="bg-[#222222] hover:bg-black text-white text-xs font-bold px-8 py-3 rounded-xl transition cursor-pointer shadow-sm disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Submitting Listing..." : "Complete & Submit"}
-                  </button>
-                )}
+                <div className="flex items-center gap-4">
+                  {formError && (
+                    <div className="text-red-500 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 animate-in fade-in zoom-in-95">
+                      {formError}
+                    </div>
+                  )}
+
+                  {step < 10 ? (
+                    <button
+                      type="button"
+                      disabled={!canProceed()}
+                      onClick={() => {
+                        setFormError(null);
+                        if (step === 1 && !streetAddress) {
+                          setAddressModalOpen(true);
+                          return;
+                        }
+                        if (step === 6 && photos.length !== 5) {
+                          setFormError("You must upload exactly 5 images to proceed.");
+                          return;
+                        }
+                        if (step === 7 && !libraryName.trim()) {
+                          setFormError("Please enter a title for your library.");
+                          return;
+                        }
+                        setStep(step + 1);
+                      }}
+                      className={`text-xs font-bold px-8 py-3 rounded-xl transition cursor-pointer shadow-sm ${canProceed()
+                          ? "bg-[#222222] hover:bg-black text-white"
+                          : "bg-stone-200 text-stone-400 cursor-not-allowed"
+                        }`}
+                    >
+                      Next
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSubmitListing}
+                      disabled={isSubmitting}
+                      className="bg-[#222222] hover:bg-black text-white text-xs font-bold px-8 py-3 rounded-xl transition cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      {isSubmitting ? "Submitting Listing..." : "Complete & Submit"}
+                    </button>
+                  )}
+                </div>
               </div>
             </footer>
           )}
@@ -1510,8 +1566,7 @@ export default function CreateLibraryWizard() {
                   Frequently asked questions
                 </h3>
                 <p className="text-xs text-stone-500 font-medium leading-relaxed">
-                  These are the most commonly asked questions about StudySpace. Can&apos;t find what you&apos;re looking for?{" "}
-                  <span className="underline font-bold text-stone-800 cursor-pointer">Chat to our friendly team!</span>
+                  These are the most commonly asked questions about StudySpace.
                 </p>
               </div>
               <button
