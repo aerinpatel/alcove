@@ -70,8 +70,6 @@ export const UpdateProfileSchema = z.object({
   hobbies: z.string().optional().nullable(),
   currentlyDoing: z.string().optional().nullable(),
   targetGoal: z.string().optional().nullable(),
-  businessInfo: z.string().optional().nullable(),
-  experience: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;

@@ -36,5 +36,5 @@ if (!parsed.success) {
   process.exit(1);
 }
 
-export const env = parsed.data;
+const env = parsed.data;
 export default env;

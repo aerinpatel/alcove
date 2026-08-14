@@ -2,7 +2,7 @@ import Redis from "ioredis";
 import env from "./env";
 
 // ioredis accepts TLS connection strings starting with rediss://
-export const redis = new Redis(env.REDIS_URL, {
+const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
 

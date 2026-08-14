@@ -20,7 +20,9 @@ export function generateRefreshToken(userId: string): string {
   });
 }
 
-export function verifyAccessToken(token: string): JWTPayload {
+// auth middleware call krta h if token present hota h toh verify krne k liye 
+
+export function verifyAccessToken(token: string): JWTPayload { // JWTPayload interface type hai 
   return jwt.verify(token, env.JWT_ACCESS_SECRET as jwt.Secret) as JWTPayload;
 }
 

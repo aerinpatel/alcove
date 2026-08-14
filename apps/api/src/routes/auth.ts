@@ -190,8 +190,6 @@ router.get("/users/me", authMiddleware, async (req, res) => {
         hobbies: true,
         currentlyDoing: true,
         targetGoal: true,
-        businessInfo: true,
-        experience: true,
         description: true,
         createdAt: true,
       },
@@ -225,8 +223,6 @@ router.patch("/users/me", authMiddleware, validateBody(UpdateProfileSchema), asy
       hobbies,
       currentlyDoing,
       targetGoal,
-      businessInfo,
-      experience,
       description,
     } = req.body;
 
@@ -241,8 +237,6 @@ router.patch("/users/me", authMiddleware, validateBody(UpdateProfileSchema), asy
         ...(hobbies !== undefined && { hobbies }),
         ...(currentlyDoing !== undefined && { currentlyDoing }),
         ...(targetGoal !== undefined && { targetGoal }),
-        ...(businessInfo !== undefined && { businessInfo }),
-        ...(experience !== undefined && { experience }),
         ...(description !== undefined && { description }),
       },
       select: {
@@ -257,8 +251,6 @@ router.patch("/users/me", authMiddleware, validateBody(UpdateProfileSchema), asy
         hobbies: true,
         currentlyDoing: true,
         targetGoal: true,
-        businessInfo: true,
-        experience: true,
         description: true,
         createdAt: true,
       },

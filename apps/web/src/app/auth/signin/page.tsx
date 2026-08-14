@@ -64,7 +64,7 @@ export default function SigninPage() {
       {/* Floating Centered Glassmorphic Sign In Card */}
       <div className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 pointer-events-none">
         
-        <div className="max-w-xl sm:max-w-[540px] w-full bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-8 sm:p-12 shadow-2xl space-y-7 pointer-events-auto my-auto">
+        <div className="max-w-md sm:max-w-[440px] w-full bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 pointer-events-auto my-auto">
           
           {/* Header Row - Logo & Sign Up Button */}
           <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export default function SigninPage() {
 
             <Link
               href="/auth/signup"
-              className="text-xs sm:text-sm font-bold text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 bg-white/80 px-5 py-2.5 rounded-full transition flex items-center gap-1.5 shadow-sm"
+              className="text-xs sm:text-sm font-bold text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 bg-white/80 px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-sm"
             >
               <User className="w-4 h-4 text-gray-500" />
               <span>Sign Up</span>
@@ -80,7 +80,7 @@ export default function SigninPage() {
           </div>
 
           <div className="space-y-1.5">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
               Sign In
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 font-medium">
@@ -102,7 +102,7 @@ export default function SigninPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
+                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
                 placeholder="Email or Username"
               />
             </div>
@@ -113,13 +113,13 @@ export default function SigninPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 pr-14 bg-white"
+                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 pr-14 bg-white"
                 placeholder="Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-6 top-4 text-gray-400 hover:text-gray-600 focus:outline-none transition cursor-pointer"
+                className="absolute right-5 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none transition cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -135,7 +135,7 @@ export default function SigninPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-brand hover:opacity-95 text-white text-base font-bold py-4 px-8 rounded-full transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-brand hover:opacity-95 text-white text-base font-bold py-3 px-6 rounded-full transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               {submitting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

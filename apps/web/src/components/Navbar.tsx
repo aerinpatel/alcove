@@ -16,9 +16,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/auth") || pathname?.startsWith("/owner")) {
-    return null;
-  }
+
 
   const isHome = pathname === "/";
 

@@ -96,12 +96,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@studyspace/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@studyspace/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^5.37.1
         version: 5.101.2(react@19.2.7)
@@ -171,9 +165,6 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.7
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.7(react@19.2.7)
     devDependencies:
       typescript:
         specifier: ^5.4.5

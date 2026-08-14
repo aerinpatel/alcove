@@ -141,7 +141,7 @@ const faqData: FaqItem[] = [
 export default function CreateLibraryWizard() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { token, user } = useAuth();
+  const { token, user, logout } = useAuth();
 
   // Creation Step Flow:
   // Step 0: Welcome / Finish listing / Start new listing
@@ -794,8 +794,23 @@ export default function CreateLibraryWizard() {
 
           {/* STEP 0: Owner Home Welcome Screen */}
           {step === 0 && (
-            <main className="flex-grow flex flex-col items-center justify-center p-6 md:p-12 max-w-2xl mx-auto w-full">
-              <div className="w-full space-y-10">
+            <main className="flex-grow flex items-center justify-center p-6 md:p-12 max-w-6xl mx-auto w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full">
+                
+                {/* Left side Image (Hidden on mobile) */}
+                <div className="hidden md:flex w-full items-center justify-start">
+                  <img
+                    src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/Welcome+back.avif"
+                    alt="Welcome back"
+                    className="w-full max-w-lg object-contain scale-110 lg:scale-125 origin-center -translate-x-8 lg:-translate-x-16 transition duration-500"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </div>
+
+                {/* Right side Content */}
+                <div className="w-full space-y-10 max-w-lg">
                 <h1 className="text-3xl sm:text-4xl font-bold text-[#222222] tracking-tight">
                   Welcome back, {user?.name || "Host"}
                 </h1>
@@ -856,7 +871,7 @@ export default function CreateLibraryWizard() {
                     </div>
                   </div>
                 </div>
-
+                </div>
               </div>
             </main>
           )}
@@ -1047,12 +1062,14 @@ export default function CreateLibraryWizard() {
                   </p>
                 </div>
 
-                <div className="w-full h-80 sm:h-[400px] rounded-3xl overflow-hidden shadow-lg border border-stone-200 bg-white">
-                  <iframe
-                    title="Little Library"
-                    className="w-full h-full border-0"
-                    allow="autoplay; fullscreen; xr-spatial-tracking"
-                    src="https://sketchfab.com/models/d808894048b64eb89d9d3783fb1f5a16/embed?autostart=1"
+                <div className="w-full flex items-center justify-center">
+                  <img
+                    src="https://studyspace-photos.s3.ap-south-1.amazonaws.com/owner_end/82bc5680-a901-42d6-80cb-a30d2b343de5.png"
+                    alt="Tell us about your place"
+                    className="w-full max-w-xl object-contain rounded-3xl transition duration-200"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
                   />
                 </div>
               </div>

@@ -83,7 +83,7 @@ export async function getOrGenerateKeyPair(userId: string): Promise<string> {
 /**
  * Loads the user's RSA private CryptoKey from localStorage.
  */
-export async function getPrivateKey(userId: string): Promise<CryptoKey | null> {
+async function getPrivateKey(userId: string): Promise<CryptoKey | null> {
   const privateKeyStorageKey = `e2e_private_key_${userId}`;
   const privateKeyJwkString = localStorage.getItem(privateKeyStorageKey);
   if (!privateKeyJwkString) return null;
@@ -101,7 +101,7 @@ export async function getPrivateKey(userId: string): Promise<CryptoKey | null> {
 /**
  * Imports an RSA SPKI base64 public key into a CryptoKey.
  */
-export async function importPublicKey(spkiBase64: string): Promise<CryptoKey> {
+async function importPublicKey(spkiBase64: string): Promise<CryptoKey> {
   const buffer = base64ToArrayBuffer(spkiBase64);
   return window.crypto.subtle.importKey(
     "spki",
@@ -112,7 +112,7 @@ export async function importPublicKey(spkiBase64: string): Promise<CryptoKey> {
   );
 }
 
-export interface EncryptedPayloadObject {
+interface EncryptedPayloadObject {
   ciphertext: string;
   iv: string;
   keys: Record<string, string>; // userId -> encryptedAesKey (base64)
@@ -231,8 +231,8 @@ export async function decryptPayload(
 
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBuffer);
-  } catch (err) {
-    console.error("Payload decryption error:", err);
+  } catch (err: any) {
+    console.warn("Payload decryption error:", err?.message || "Key Mismatch");
     return "[Encrypted Message - Key Mismatch]";
   }
 }

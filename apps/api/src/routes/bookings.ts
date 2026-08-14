@@ -10,6 +10,7 @@ import { getPresignedDownloadUrl } from "../utils/s3";
 
 const router = Router();
 
+// access key generate hoti hai 
 function generateReadableAccessKey(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const p1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -17,7 +18,8 @@ function generateReadableAccessKey(): string {
   return `AL-${p1}-${p2}`;
 }
 
-// Helper to get seat with library details
+
+
 async function getSeatLibraryInfo(seatId: string) {
   return prisma.seat.findUnique({
     where: { id: seatId },
@@ -31,13 +33,16 @@ async function getSeatLibraryInfo(seatId: string) {
   });
 }
 
+
+// get all the dates between the given start and enddate
+
 function getDatesBetween(startDateStr: string, endDateStr: string): Date[] {
   const start = new Date(startDateStr);
   start.setHours(0, 0, 0, 0);
   const end = new Date(endDateStr);
   end.setHours(0, 0, 0, 0);
 
-  const dates: Date[] = [];
+  const dates: Date[] = []; // dayes ka array 
   let current = new Date(start);
 
   let count = 0;
@@ -46,13 +51,16 @@ function getDatesBetween(startDateStr: string, endDateStr: string): Date[] {
     current.setDate(current.getDate() + 1);
     count++;
   }
+
   return dates;
 }
 
-// POST /bookings/hold - Place temporary Redis-backed hold on seat (supports ranges)
+// route that gets called on monent user click a seat for checkout 
+// authmiddleware m token check hoga jwt.ts call krke or auth call krke 
 router.post("/hold", authMiddleware, validateBody(BookingHoldSchema), async (req, res) => {
   try {
-    const io = req.app.get("io");
+    const io = req.app.get("io"); // socket.io instance lelete h express se
+
     const { seatId, slotTypeId, date, startDate, endDate } = req.body;
     const userId = req.user!.userId;
 

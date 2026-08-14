@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema, ZodError } from "zod";
 
+
 export function validateBody(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -10,6 +11,8 @@ export function validateBody(schema: ZodSchema) {
       if (error instanceof ZodError) {
         return res.status(400).json({
           message: "Validation failed",
+          // zod error dikhado
+
           errors: error.errors.map((err) => ({
             field: err.path.join("."),
             message: err.message,
@@ -20,3 +23,4 @@ export function validateBody(schema: ZodSchema) {
     }
   };
 }
+

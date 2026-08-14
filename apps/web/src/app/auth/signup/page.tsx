@@ -134,7 +134,7 @@ function SignupContent() {
       {/* Floating Centered Glassmorphic Create Account Card */}
       <div className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 pointer-events-none">
         
-        <div className="max-w-xl sm:max-w-[540px] w-full bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-8 sm:p-12 shadow-2xl space-y-6 pointer-events-auto my-auto">
+        <div className="max-w-md sm:max-w-[440px] w-full bg-white/95 backdrop-blur-xl border border-white/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 pointer-events-auto my-auto">
           
           {/* Header Row - Logo & Sign In Button */}
           <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ function SignupContent() {
 
             <Link
               href="/auth/signin"
-              className="text-xs sm:text-sm font-bold text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 bg-white/80 px-5 py-2.5 rounded-full transition flex items-center gap-1.5 shadow-sm"
+              className="text-xs sm:text-sm font-bold text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 bg-white/80 px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-sm"
             >
               <LogIn className="w-4 h-4 text-gray-500" />
               <span>Sign In</span>
@@ -150,7 +150,7 @@ function SignupContent() {
           </div>
 
           <div className="space-y-1.5">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
               Create Account
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 font-medium">
@@ -172,7 +172,7 @@ function SignupContent() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
+                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
                 placeholder="Full Name"
               />
             </div>
@@ -183,7 +183,7 @@ function SignupContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={`w-full border rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white ${
+                className={`w-full border rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white ${
                   emailAvailable === false
                     ? "border-red-400 focus:border-red-500"
                     : emailAvailable === true
@@ -203,7 +203,7 @@ function SignupContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className={`w-full border rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white ${
+                className={`w-full border rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white ${
                   isPasswordValid
                     ? "border-emerald-400 focus:border-emerald-500"
                     : "border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand"
@@ -217,7 +217,7 @@ function SignupContent() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
+                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 transition shadow-sm placeholder:text-gray-400 bg-white"
                 placeholder="Phone Number (optional)"
               />
             </div>
@@ -226,7 +226,7 @@ function SignupContent() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as "STUDENT" | "OWNER")}
-                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-4 px-6 outline-none text-gray-800 bg-white font-medium transition cursor-pointer shadow-sm"
+                className="w-full border border-gray-200 focus:border-brand focus:ring-1 focus:ring-brand rounded-full text-sm sm:text-base p-3 px-5 outline-none text-gray-800 bg-white font-medium transition cursor-pointer shadow-sm"
               >
                 <option value="STUDENT">I want to book study space (Student)</option>
                 <option value="OWNER">I own a library / study space (Host)</option>
@@ -237,7 +237,7 @@ function SignupContent() {
             <button
               type="submit"
               disabled={submitting || emailAvailable === false}
-              className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-brand hover:opacity-95 text-white text-base font-bold py-4 px-8 rounded-full transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-brand hover:opacity-95 text-white text-base font-bold py-3 px-6 rounded-full transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               {submitting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

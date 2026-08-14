@@ -20,8 +20,6 @@ model User {
   hobbies        String?
   currentlyDoing String?
   targetGoal     String?
-  businessInfo   String?
-  experience     String?
   description    String?
   createdAt      DateTime       @default(now())
   bookings       Booking[]

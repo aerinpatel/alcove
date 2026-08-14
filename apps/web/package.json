@@ -8,8 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@studyspace/shared": "workspace:*",
-    "@studyspace/ui": "workspace:*",
     "@tanstack/react-query": "^5.37.1",
     "autoprefixer": "^10.4.19",
     "konva": "^9.3.6",
