@@ -18,7 +18,8 @@ import {
   VolumeX,
   Lock,
   Coffee,
-  MessageSquare
+  MessageSquare,
+  ChevronDown
 } from "lucide-react";
 import { useAuth } from "../../../context/AppContext";
 
@@ -373,93 +374,92 @@ export default function LibraryDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Right Column - Sticky Reservation Panel */}
         <div className="w-full lg:sticky lg:top-24">
-          <div className="bg-white border border-[#E8E2D5] rounded-2xl p-6 shadow-lg sticky-panel-shadow">
+          <div className="bg-white border border-[#E8E2D5] rounded-2xl p-6 shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
             
             {/* Price section */}
-            <div className="flex items-end justify-between mb-5">
-              <span className="text-xl font-black text-[#221C19]">
-                ₹{displayPrice} <span className="text-sm font-semibold text-[#6B5E57]">/ slot</span>
+            <div className="mb-6 flex items-baseline gap-1.5">
+              <span className="text-[22px] font-bold text-gray-900">
+                ₹{displayPrice}
               </span>
-              <span className="text-xs font-semibold text-[#6B5E57] flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                {library.rating ? `${library.rating.toFixed(1)}` : "New"}
-              </span>
+              <span className="text-base text-gray-700">for 1 slot</span>
             </div>
 
             {/* Inputs widget panel */}
-            <div className="border border-[#E8E2D5] bg-[#F8F5EE] rounded-xl overflow-hidden mb-5">
+            <div className="border border-gray-400 rounded-xl overflow-hidden mb-4">
               
               {/* Date selection */}
-              <div className="grid grid-cols-2 border-b border-[#E8E2D5]">
-                <div className="p-3 border-r border-[#E8E2D5]">
-                  <label className="block text-[10px] font-black text-[#6B5E57] uppercase mb-1">
-                    From Date
+              <div className="grid grid-cols-2 border-b border-gray-400">
+                <div className="p-3 border-r border-gray-400 relative">
+                  <label className="block text-[10px] font-extrabold text-gray-900 uppercase tracking-wide mb-1">
+                    Check-in
                   </label>
-                  <div className="flex items-center gap-1.5 text-xs text-[#221C19] font-semibold cursor-pointer">
-                    <Calendar className="w-3.5 h-3.5 text-brand shrink-0" />
-                    <input
-                      type="date"
-                      min={new Date().toISOString().split("T")[0]}
-                      value={selectedStartDate}
-                      onChange={(e) => {
-                        setSelectedStartDate(e.target.value);
-                        if (new Date(e.target.value) > new Date(selectedEndDate)) {
-                          setSelectedEndDate(e.target.value);
-                        }
-                      }}
-                      className="outline-none bg-transparent w-full text-[#221C19] text-xs font-bold"
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split("T")[0]}
+                    value={selectedStartDate}
+                    onChange={(e) => {
+                      setSelectedStartDate(e.target.value);
+                      if (new Date(e.target.value) > new Date(selectedEndDate)) {
+                        setSelectedEndDate(e.target.value);
+                      }
+                    }}
+                    className="outline-none bg-transparent w-full text-gray-900 text-[15px] cursor-pointer"
+                  />
                 </div>
 
-                <div className="p-3">
-                  <label className="block text-[10px] font-black text-[#6B5E57] uppercase mb-1">
-                    To Date
+                <div className="p-3 relative">
+                  <label className="block text-[10px] font-extrabold text-gray-900 uppercase tracking-wide mb-1">
+                    Checkout
                   </label>
-                  <div className="flex items-center gap-1.5 text-xs text-[#221C19] font-semibold cursor-pointer">
-                    <Calendar className="w-3.5 h-3.5 text-brand shrink-0" />
-                    <input
-                      type="date"
-                      min={selectedStartDate}
-                      value={selectedEndDate}
-                      onChange={(e) => setSelectedEndDate(e.target.value)}
-                      className="outline-none bg-transparent w-full text-[#221C19] text-xs font-bold"
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    min={selectedStartDate}
+                    value={selectedEndDate}
+                    onChange={(e) => setSelectedEndDate(e.target.value)}
+                    className="outline-none bg-transparent w-full text-gray-900 text-[15px] cursor-pointer"
+                  />
                 </div>
               </div>
 
               {/* Slot selection dropdown */}
-              <div className="p-3">
-                <label className="block text-[10px] font-black text-[#6B5E57] uppercase mb-1">
-                  Select Timing Slot
+              <div className="p-3 relative">
+                <label className="block text-[10px] font-extrabold text-gray-900 uppercase tracking-wide mb-1">
+                  Slot
                 </label>
-                <select
-                  value={selectedSlotId}
-                  onChange={(e) => setSelectedSlotId(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm text-[#221C19] font-semibold py-1 cursor-pointer"
-                >
-                  <option value="">-- Choose Slot --</option>
-                  {library.slotTypes.map((slot) => (
-                    <option key={slot.id} value={slot.id}>
-                      {slot.name} ({slot.startTime} - {slot.endTime})
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between">
+                  <select
+                    value={selectedSlotId}
+                    onChange={(e) => setSelectedSlotId(e.target.value)}
+                    className="w-full bg-transparent outline-none text-[15px] text-gray-900 cursor-pointer appearance-none pr-6"
+                  >
+                    <option value="">1 slot</option>
+                    {library.slotTypes.map((slot) => (
+                      <option key={slot.id} value={slot.id}>
+                        {slot.name} ({slot.startTime} - {slot.endTime})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-5 h-5 text-gray-900 absolute right-3 pointer-events-none" />
+                </div>
               </div>
+            </div>
+
+            {/* Free cancellation pill */}
+            <div className="bg-[#f1f1f1] text-gray-700 text-sm font-semibold text-center py-2.5 rounded-lg mb-5">
+              Free cancellation before 10 September
             </div>
 
             {/* Action button */}
             <button
               onClick={handleProceedToBooking}
               disabled={!selectedSlotId}
-              className="w-full bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3.5 rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="w-full bg-[#E51D53] hover:bg-[#D4144B] text-white text-base font-bold py-3.5 rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
-              Check availability
+              Reserve
             </button>
 
-            <p className="text-[11px] text-[#A0938A] text-center mt-4">
-              You won&apos;t be charged yet. Seat map selection is on the next step.
+            <p className="text-sm text-gray-500 font-medium text-center mt-4">
+              You won&apos;t be charged yet
             </p>
           </div>
         </div>

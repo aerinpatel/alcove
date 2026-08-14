@@ -13,7 +13,7 @@ export default function NavigationWrapper({ children }: { children: React.ReactN
   const isSearchRoute = pathname?.startsWith("/search");
 
   const showFooter = !isOwnerRoute && !isAuthRoute;
-  const showNavbar = showFooter && !isSearchRoute;
+  const showNavbar = showFooter;
 
   return (
     <>

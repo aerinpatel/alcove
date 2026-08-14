@@ -305,11 +305,20 @@ router.get("/search", async (req, res) => {
     };
 
     if (searchQuery) {
-      whereClause.OR = [
-        { name: { contains: searchQuery, mode: "insensitive" } },
-        { address: { contains: searchQuery, mode: "insensitive" } },
-        { city: { contains: searchQuery, mode: "insensitive" } },
-      ];
+      const searchTerms = searchQuery
+        .split(/[\s,]+/)
+        .map((term) => term.trim())
+        .filter((term) => term.length > 0);
+
+      if (searchTerms.length > 0) {
+        whereClause.AND = searchTerms.map((term) => ({
+          OR: [
+            { name: { contains: term, mode: "insensitive" } },
+            { address: { contains: term, mode: "insensitive" } },
+            { city: { contains: term, mode: "insensitive" } },
+          ],
+        }));
+      }
     }
 
     const libraries = await prisma.library.findMany({

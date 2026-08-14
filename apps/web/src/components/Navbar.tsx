@@ -19,6 +19,7 @@ export default function Navbar() {
 
 
   const isHome = pathname === "/";
+  const isSearchOrLibrary = pathname?.startsWith("/search") || pathname?.startsWith("/libraries");
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -123,53 +124,58 @@ export default function Navbar() {
     return <OwnerNavbar />;
   }
 
-  return (
-    <header
-      className="sticky top-0 z-40 w-full bg-[#F8F5EE]/95 backdrop-blur-md border-b border-[#E8E2D5] text-[#221C19] transition-colors duration-200"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  if (isHome) {
+    return (
+      <header
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl transition-all duration-300"
+      >
+        <div className="bg-white/95 backdrop-blur-md rounded-full shadow-2xl border border-stone-200 p-2 pl-4 flex items-center justify-between">
 
-        {/* Logo */}
-        <Link href="/" onClick={() => setIsSearchExpanded(false)} className="flex items-center gap-2 shrink-0">
-          <AlcoveLogo size="md" variant="dark" />
-        </Link>
+          {/* Logo */}
+          <Link href="/" onClick={() => setIsSearchExpanded(false)} className="flex items-center gap-2 shrink-0">
+            <div className="w-10 h-10 bg-stone-900 rounded-full flex items-center justify-center hover:scale-105 transition-transform overflow-hidden p-1">
+              <AlcoveLogo size="sm" iconOnly variant="light" />
+            </div>
+          </Link>
 
-        {/* Centered Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/"
-            className={`text-sm font-medium transition ${pathname === "/" ? "text-brand font-bold" : "text-[#5A4D45] hover:text-brand"
-              }`}
-          >
-            Home
-          </Link>
-          <Link
-            href="/bookings"
-            className={`text-sm font-medium transition ${pathname === "/bookings" ? "text-brand font-bold" : "text-[#5A4D45] hover:text-brand"
-              }`}
-          >
-            My Bookings
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium text-[#5A4D45] hover:text-brand transition"
-          >
-            About Us
-          </Link>
-          <Link
-            href="/contact"
-            className="text-sm font-medium text-[#5A4D45] hover:text-brand transition"
-          >
-            Contact Us
-          </Link>
-        </nav>
+          {/* Centered Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8">
+            <Link
+              href="/"
+              className={`relative group text-sm font-semibold transition-colors py-2 text-stone-900`}
+            >
+              Home
+              <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 scale-x-100`}></span>
+            </Link>
+            <Link
+              href="/bookings"
+              className={`relative group text-sm font-semibold transition-colors py-2 text-stone-500 hover:text-stone-900`}
+            >
+              My Bookings
+              <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 scale-x-0 group-hover:scale-x-100`}></span>
+            </Link>
+            <Link
+              href="/about"
+              className={`relative group text-sm font-semibold transition-colors py-2 text-stone-500 hover:text-stone-900`}
+            >
+              About Us
+              <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 scale-x-0 group-hover:scale-x-100`}></span>
+            </Link>
+            <Link
+              href="/contact"
+              className={`relative group text-sm font-semibold transition-colors py-2 text-stone-500 hover:text-stone-900`}
+            >
+              Contact Us
+              <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 scale-x-0 group-hover:scale-x-100`}></span>
+            </Link>
+          </nav>
 
         {/* User Actions - Right Corner */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 shrink-0 pr-1">
           {!user ? (
             <Link
               href="/auth/signup"
-              className="text-xs font-bold px-5 py-2.5 rounded-full transition shadow-md flex items-center justify-center cursor-pointer bg-brand hover:bg-brand-hover text-white"
+              className="text-sm font-bold px-6 py-2.5 rounded-full transition shadow-md flex items-center justify-center cursor-pointer bg-stone-900 hover:bg-stone-800 text-white"
             >
               Get Started
             </Link>
@@ -178,18 +184,17 @@ export default function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-3 border border-[#E8E2D5] bg-white hover:border-brand transition p-2 rounded-full cursor-pointer relative text-[#221C19] shadow-sm hover:shadow"
+                className="flex items-center justify-center rounded-full cursor-pointer relative shadow-sm border border-stone-200 hover:ring-2 hover:ring-stone-300 transition-all w-11 h-11 bg-white"
               >
-                <Menu className="w-4.5 h-4.5 ml-1 text-[#5A4D45]" />
                 {user?.avatarUrl && !avatarErr ? (
                   <img
                     src={getAvatarUrl(user.avatarUrl) || user.avatarUrl}
                     alt={user.name}
                     onError={() => setAvatarErr(true)}
-                    className="w-7 h-7 rounded-full object-cover border border-[#E8E2D5]"
+                    className="w-11 h-11 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-[#A95031] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                  <div className="w-11 h-11 rounded-full bg-stone-800 text-white flex items-center justify-center font-bold text-lg">
                     {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
                   </div>
                 )}
@@ -271,7 +276,190 @@ export default function Navbar() {
 
       </div>
 
-      {/* Expanded Search Popout Overlay Panel (Only for logged-in Students) */}
+    </header>
+    );
+  }
+
+  // Standard sticky navbar for other pages
+  return (
+    <>
+      <header className="sticky top-0 z-40 bg-white border-b border-stone-200">
+      <div className="px-4 sm:px-8 py-4 flex items-center justify-between mx-auto max-w-7xl">
+        {/* Left: Logo */}
+        <div className="flex-1 hidden md:block">
+          <Link href="/">
+            <AlcoveLogo variant="dark" size="sm" />
+          </Link>
+        </div>
+        
+        {/* Center: Navigation Links or Search Pill */}
+        <div className="flex-1 flex justify-center w-full md:w-auto px-4 md:px-0">
+          {isSearchOrLibrary ? (
+            <div className="flex items-center bg-white border border-stone-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 divide-x divide-stone-200 py-1.5 pl-2 pr-1.5 w-full max-w-2xl">
+              
+              <div className="px-5 py-1 flex-1">
+                <label className="text-[10px] font-extrabold uppercase tracking-widest text-stone-800 block mb-0.5">
+                  Location
+                </label>
+                <input 
+                  type="text"
+                  value={cityVal} 
+                  onChange={(e) => setCityVal(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleOverlaySearchSubmit(e as any);
+                  }}
+                  className="w-full text-sm font-semibold text-stone-900 placeholder:text-stone-400 bg-transparent outline-none truncate"
+                  placeholder="Where to?"
+                />
+              </div>
+
+              <div className="px-5 py-1 flex-1">
+                <label className="text-[10px] font-extrabold uppercase tracking-widest text-stone-800 block mb-0.5">
+                  Dates
+                </label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="date" 
+                    value={startDateVal} 
+                    onChange={(e) => setStartDateVal(e.target.value)} 
+                    className="w-full text-sm font-semibold text-stone-900 bg-transparent outline-none cursor-pointer" 
+                  />
+                  <span className="text-stone-300">-</span>
+                  <input 
+                    type="date" 
+                    value={endDateVal} 
+                    min={startDateVal} 
+                    onChange={(e) => setEndDateVal(e.target.value)} 
+                    className="w-full text-sm font-semibold text-stone-900 bg-transparent outline-none cursor-pointer" 
+                  />
+                </div>
+              </div>
+
+              <div className="pl-3">
+                <button onClick={handleOverlaySearchSubmit} className="bg-[#A95031] text-white p-3.5 rounded-full hover:bg-[#8E3F24] transition flex items-center justify-center shrink-0 shadow-sm">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+              
+            </div>
+          ) : (
+            <nav className="hidden md:flex items-center gap-8">
+              <Link
+                href="/"
+                className={`relative group text-sm font-semibold transition-colors py-2 text-stone-500 hover:text-stone-900`}
+              >
+                Home
+                <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 scale-x-0 group-hover:scale-x-100`}></span>
+              </Link>
+              <Link
+                href="/bookings"
+                className={`relative group text-sm font-semibold transition-colors py-2 ${pathname?.startsWith("/bookings") ? "text-stone-900" : "text-stone-500 hover:text-stone-900"}`}
+              >
+                My Bookings
+                <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 ${pathname?.startsWith("/bookings") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}></span>
+              </Link>
+              <Link
+                href="/about"
+                className={`relative group text-sm font-semibold transition-colors py-2 ${pathname?.startsWith("/about") ? "text-stone-900" : "text-stone-500 hover:text-stone-900"}`}
+              >
+                About Us
+                <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 ${pathname?.startsWith("/about") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}></span>
+              </Link>
+              <Link
+                href="/contact"
+                className={`relative group text-sm font-semibold transition-colors py-2 ${pathname?.startsWith("/contact") ? "text-stone-900" : "text-stone-500 hover:text-stone-900"}`}
+              >
+                Contact Us
+                <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-stone-900 transition-transform origin-left duration-300 ${pathname?.startsWith("/contact") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}></span>
+              </Link>
+            </nav>
+          )}
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-2">
+          {!user ? (
+            <Link
+              href="/auth/signup"
+              className="font-semibold text-sm hover:bg-stone-50 px-4 py-2 rounded-full transition text-stone-900 border border-stone-200"
+            >
+              Sign In
+            </Link>
+          ) : (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center justify-center rounded-full cursor-pointer relative hover:ring-2 hover:ring-stone-200 transition shadow-sm border border-stone-200"
+              >
+                {user?.avatarUrl && !avatarErr ? (
+                  <img
+                    src={getAvatarUrl(user.avatarUrl) || user.avatarUrl}
+                    alt={user.name}
+                    onError={() => setAvatarErr(true)}
+                    className="w-10 h-10 rounded-full object-cover bg-stone-100"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#A95031] text-white flex items-center justify-center font-bold text-sm">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                  </div>
+                )}
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2.5 w-60 bg-white rounded-xl shadow-xl border border-[#E8E2D5] py-2 text-sm text-[#221C19] animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-4 py-2.5 border-b border-[#E8E2D5]">
+                    <p className="font-semibold text-[#221C19] truncate">{user.name}</p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p className="text-xs text-[#6B5E57] truncate">{user.email}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-brand-light text-brand-dark px-1.5 py-0.5 rounded">
+                        {user.role}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link href="/profile" onClick={() => setDropdownOpen(false)} className="px-4 py-2.5 hover:bg-[#F7EBE4] hover:text-brand flex items-center gap-3 transition font-medium text-[#221C19]">
+                    <User className="w-4 h-4 text-[#6B5E57]" />
+                    Profile
+                  </Link>
+
+                  <Link href="/messages" onClick={() => setDropdownOpen(false)} className="px-4 py-2.5 hover:bg-[#F7EBE4] hover:text-brand flex items-center gap-3 transition font-medium text-[#221C19]">
+                    <MessageSquare className="w-4 h-4 text-[#6B5E57]" />
+                    Messages
+                  </Link>
+                  
+                  {user?.role === "ADMIN" && (
+                    <Link href="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="px-4 py-2.5 hover:bg-[#F7EBE4] hover:text-brand flex items-center gap-3 transition font-medium text-[#221C19]">
+                      <Settings className="w-4 h-4 text-[#6B5E57]" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  
+                  {user?.role === "ADMIN" ? (
+                    <Link href="/owner/libraries/create" onClick={() => setDropdownOpen(false)} className="px-4 py-2.5 hover:bg-[#F7EBE4] hover:text-brand flex items-center gap-3 transition font-medium text-[#221C19]">
+                      <LayoutDashboard className="w-4 h-4 text-[#6B5E57]" />
+                      Host Dashboard
+                    </Link>
+                  ) : null}
+                  
+                  <div className="h-px bg-stone-100 w-full my-1"></div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setDropdownOpen(false);
+                      router.push("/auth/signup");
+                    }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 transition font-medium text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      </header>
       {isSearchExpanded && user && user.role === "STUDENT" && (
         <>
           {/* Backdrop overlay blur background */}
@@ -407,7 +595,6 @@ export default function Navbar() {
           </div>
         </>
       )}
-
-    </header>
+    </>
   );
 }

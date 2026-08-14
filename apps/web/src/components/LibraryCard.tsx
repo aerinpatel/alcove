@@ -56,13 +56,7 @@ export function LibraryCard({ lib }: { lib: LibraryListItem }) {
           </span>
         </div>
 
-        {/* Hover Reserve Pill Overlay */}
-        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <span className="w-full bg-[#A95031] text-white text-xs font-bold py-2.5 rounded-full flex items-center justify-center gap-1.5 shadow-md">
-            <span>Reserve Seat</span>
-            <span className="text-sm">→</span>
-          </span>
-        </div>
+
       </div>
 
       {/* Spacious Card Info Section */}

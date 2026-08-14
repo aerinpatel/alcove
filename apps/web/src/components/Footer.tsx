@@ -36,9 +36,17 @@ export default function Footer() {
             <Link href="#contact" className="hover:text-white transition text-white/60 font-semibold tracking-wide text-xs uppercase">Contact Us</Link>
           </div>
           
+          <div className="text-white/60 text-xs font-medium">
+            Made By{" "}
+            <a href="https://github.com/aerinpatel" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#A95031] transition font-bold">
+              Aerin Patel
+            </a>{" "}
+            <span className="text-red-500">❤️</span>
+          </div>
+
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/80 font-bold px-4 py-2 rounded-full border border-white/10 transition cursor-pointer text-xs"
+            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/80 font-bold px-4 py-2 rounded-full border border-white/10 transition cursor-pointer text-xs shrink-0"
           >
             <span>Back to top</span>
             <ArrowUp className="w-3 h-3 text-[#A95031]" />
