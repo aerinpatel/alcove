@@ -22,7 +22,7 @@ import LocationAutocomplete from "../../components/LocationAutocomplete";
 import AlcoveLogo from "../../components/AlcoveLogo";
 import { useAuth } from "../../context/AppContext";
 
-export default function SearchPage() {
+function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
@@ -236,5 +236,13 @@ export default function SearchPage() {
       </main>
 
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <React.Suspense fallback={<div className="flex justify-center p-20">Loading search...</div>}>
+      <SearchContent />
+    </React.Suspense>
   );
 }
