@@ -24,7 +24,6 @@ const setRefreshTokenCookie = (res: any, token: string) => {
   });
 };
 
-// Check email availability (Live check)
 router.get("/check-email", async (req, res) => {
   try {
     const { email } = req.query;
